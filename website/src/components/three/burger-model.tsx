@@ -7,6 +7,7 @@ import {
   displaceGeometry,
   fbm3,
   makeBumpTexture,
+  makeNormalTexture,
   makeSurfaceTexture,
 } from "@/lib/procedural";
 
@@ -88,7 +89,7 @@ function makeCheese(halfWidth: number) {
     const r = Math.hypot(v.x, v.z) / halfWidth;
     // flat over the patty, then melts down past the rim
     const dt = Math.min(1, Math.max(0, (r - 0.58) / 0.42));
-    const droop = r < 0.58 ? 0 : -Math.pow(dt, 1.6) * halfWidth * 0.46;
+    const droop = r < 0.58 ? 0 : -Math.pow(dt, 1.6) * halfWidth * 0.24;
     const ripple = 0.008 * halfWidth * Math.sin(Math.atan2(v.z, v.x) * 11);
     pos.setXYZ(i, v.x, v.y + droop + ripple * (r > 0.7 ? 1 : 0), v.z);
   }
@@ -132,6 +133,43 @@ function makeLettuce(inner: number, outer: number) {
   return geo;
 }
 
+/** Onion ring: a torus flattened into a slice, with a slightly wavy radius. */
+function makeOnionRing(radius: number, tube: number) {
+  const geo = new THREE.TorusGeometry(radius, tube, 12, 120);
+  geo.rotateX(Math.PI / 2);
+  geo.scale(1, 0.42, 1);
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const a = Math.atan2(v.z, v.x);
+    const w = 1 + 0.03 * Math.sin(a * 5 + 0.7);
+    pos.setXYZ(i, v.x * w, v.y, v.z * w);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/** Pickle slice: a fluted disc. */
+function makePickle(radius: number, thickness: number) {
+  const geo = new THREE.CylinderGeometry(radius, radius, thickness, 48, 1);
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const r = Math.hypot(v.x, v.z);
+    if (r > 1e-4) {
+      const a = Math.atan2(v.z, v.x);
+      const w = 1 + 0.05 * Math.sin(a * 11);
+      pos.setXYZ(i, v.x * w, v.y, v.z * w);
+    }
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
 function makeTomato(radius: number, thickness: number) {
   const geo = new THREE.CylinderGeometry(radius, radius, thickness, 72, 1);
   displaceGeometry(geo, radius * 0.01, 9, 3);
@@ -141,6 +179,21 @@ function makeTomato(radius: number, thickness: number) {
 /* ---------------------------------------------------------------- *
  * The model
  * ---------------------------------------------------------------- */
+
+/**
+ * Assembled rest height and explode travel for each layer, top to bottom.
+ * Exported so a real .glb model can be pulled apart by the same distances.
+ */
+export const STACK_LAYOUT = [
+  { y: 0.30, spread: 1.95 }, // 0 top bun
+  { y: 0.23, spread: 1.42 }, // 1 tomato
+  { y: 0.15, spread: 1.04 }, // 2 lettuce
+  { y: 0.09, spread: 0.74 }, // 3 onion
+  { y: 0.02, spread: 0.46 }, // 4 cheese
+  { y: -0.13, spread: 0.14 }, // 5 patty
+  { y: -0.25, spread: -0.16 }, // 6 pickles
+  { y: -0.27, spread: -0.40 }, // 7 bottom bun
+];
 
 export type BurgerModelProps = {
   /** 0 = assembled, 1 = fully exploded */
@@ -165,9 +218,11 @@ export function BurgerModel({ explode = 0, explodeRef, spin = 0 }: BurgerModelPr
       topBun: checkFinite(makeBunDome(1.0, 0.62, 0.0), "topBun"),
       bottomBun: checkFinite(makeBunDome(0.98, 0.34, 3.1), "bottomBun"),
       patty: checkFinite(makePatty(0.94, 0.26), "patty"),
-      cheese: checkFinite(makeCheese(0.92), "cheese"),
+      cheese: checkFinite(makeCheese(0.72), "cheese"),
       lettuce: checkFinite(makeLettuce(0.5, 1.0), "lettuce"),
       tomato: checkFinite(makeTomato(0.82, 0.075), "tomato"),
+      onion: checkFinite(makeOnionRing(0.72, 0.07), "onion"),
+      pickle: checkFinite(makePickle(0.2, 0.045), "pickle"),
     }),
     [],
   );
@@ -184,6 +239,20 @@ export function BurgerModel({ explode = 0, explodeRef, spin = 0 }: BurgerModelPr
     return {
       bunMap,
       bunBump: makeBumpTexture({ scale: 26, contrast: 1.5 }),
+      bunNormal: makeNormalTexture({ scale: 30, strength: 2.6 }),
+      pattyNormal: makeNormalTexture({ scale: 44, strength: 3.4 }),
+      onionMap: makeSurfaceTexture({
+        base: "#E3D2DC",
+        dark: "#B79FB0",
+        light: "#F7EFF3",
+        scale: 10,
+      }),
+      pickleMap: makeSurfaceTexture({
+        base: "#7C9A34",
+        dark: "#55701F",
+        light: "#A8C264",
+        scale: 12,
+      }),
       pattyMap: makeSurfaceTexture({
         base: "#8A5629",
         dark: "#552C13",
@@ -239,18 +308,7 @@ export function BurgerModel({ explode = 0, explodeRef, spin = 0 }: BurgerModelPr
     return out;
   }, []);
 
-  /* ---- assembled Y positions, and where each layer flies to ---- */
-  const stack = useMemo(
-    () => [
-      { y: 0.24, spread: 1.55 }, // top bun
-      { y: 0.17, spread: 1.02 }, // tomato
-      { y: 0.07, spread: 0.66 }, // lettuce
-      { y: 0.01, spread: 0.34 }, // cheese
-      { y: -0.14, spread: 0.06 }, // patty
-      { y: -0.26, spread: -0.26 }, // bottom bun
-    ],
-    [],
-  );
+  const stack = STACK_LAYOUT;
 
   const eased = useRef(0);
 
@@ -283,12 +341,16 @@ export function BurgerModel({ explode = 0, explodeRef, spin = 0 }: BurgerModelPr
       {/* top bun */}
       <group ref={setLayer(0)}>
         <mesh geometry={geo.topBun} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.bunMap}
+            normalMap={tex.bunNormal}
+            normalScale={new THREE.Vector2(0.75, 0.75)}
             bumpMap={tex.bunBump}
-            bumpScale={0.012}
-            roughness={0.82}
+            bumpScale={0.008}
+            roughness={0.8}
             metalness={0}
+            sheen={0.25}
+            sheenColor="#ffd9a8"
           />
         </mesh>
         {seeds.map((s, i) => (
@@ -305,62 +367,116 @@ export function BurgerModel({ explode = 0, explodeRef, spin = 0 }: BurgerModelPr
         ))}
       </group>
 
-      {/* tomato */}
+      {/* tomato — clearcoat gives it the wet sheen a cut tomato has */}
       <group ref={setLayer(1)}>
         <mesh geometry={geo.tomato} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.tomatoMap}
-            roughness={0.32}
+            roughness={0.36}
             metalness={0}
+            clearcoat={0.6}
+            clearcoatRoughness={0.35}
+            sheen={0.3}
+            sheenColor="#ff8a70"
           />
         </mesh>
       </group>
 
-      {/* lettuce */}
+      {/* lettuce — sheen fakes the waxy translucency of a leaf edge */}
       <group ref={setLayer(2)}>
         <mesh geometry={geo.lettuce} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.lettuceMap}
-            roughness={0.45}
+            roughness={0.42}
             metalness={0}
             side={THREE.DoubleSide}
+            sheen={0.6}
+            sheenColor="#c9e79a"
+            clearcoat={0.25}
+          />
+        </mesh>
+      </group>
+
+      {/* onion ring */}
+      <group ref={setLayer(3)}>
+        <mesh geometry={geo.onion} castShadow receiveShadow>
+          <meshPhysicalMaterial
+            map={tex.onionMap}
+            roughness={0.3}
+            metalness={0}
+            clearcoat={0.5}
+            clearcoatRoughness={0.3}
           />
         </mesh>
       </group>
 
       {/* cheese */}
-      <group ref={setLayer(3)}>
+      <group ref={setLayer(4)}>
         <mesh geometry={geo.cheese} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.cheeseMap}
-            roughness={0.28}
+            roughness={0.3}
             metalness={0}
             side={THREE.DoubleSide}
+            clearcoat={0.45}
+            clearcoatRoughness={0.4}
           />
         </mesh>
       </group>
 
       {/* patty */}
-      <group ref={setLayer(4)}>
+      <group ref={setLayer(5)}>
         <mesh geometry={geo.patty} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.pattyMap}
+            normalMap={tex.pattyNormal}
+            normalScale={new THREE.Vector2(1.1, 1.1)}
             bumpMap={tex.pattyBump}
-            bumpScale={0.02}
-            roughness={0.62}
+            bumpScale={0.012}
+            roughness={0.58}
             metalness={0}
+            clearcoat={0.28}
+            clearcoatRoughness={0.6}
           />
         </mesh>
       </group>
 
+      {/* pickles */}
+      <group ref={setLayer(6)}>
+        {[
+          [0.34, 0, 0.2],
+          [-0.3, 0, 0.34],
+          [0.02, 0, -0.38],
+        ].map((p, i) => (
+          <mesh
+            key={i}
+            geometry={geo.pickle}
+            position={p as [number, number, number]}
+            rotation={[0, i * 1.2, 0]}
+            castShadow
+            receiveShadow
+          >
+            <meshPhysicalMaterial
+              map={tex.pickleMap}
+              roughness={0.34}
+              metalness={0}
+              clearcoat={0.5}
+              clearcoatRoughness={0.3}
+            />
+          </mesh>
+        ))}
+      </group>
+
       {/* bottom bun */}
-      <group ref={setLayer(5)}>
+      <group ref={setLayer(7)}>
         <mesh geometry={geo.bottomBun} rotation={[Math.PI, 0, 0]} castShadow receiveShadow>
-          <meshStandardMaterial
+          <meshPhysicalMaterial
             map={tex.bunMap}
+            normalMap={tex.bunNormal}
+            normalScale={new THREE.Vector2(0.75, 0.75)}
             bumpMap={tex.bunBump}
-            bumpScale={0.012}
-            roughness={0.85}
+            bumpScale={0.008}
+            roughness={0.86}
             metalness={0}
           />
         </mesh>

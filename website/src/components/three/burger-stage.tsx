@@ -4,7 +4,9 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
-import { BurgerModel } from "./burger-model";
+import { BurgerModel, STACK_LAYOUT } from "./burger-model";
+import { BURGER_GLB, BurgerGLTF } from "./burger-gltf";
+import { SplineBoundary } from "@/components/ui/spline-boundary";
 
 /**
  * Studio lighting is built from Lightformers rather than an HDRI preset:
@@ -71,10 +73,29 @@ export function BurgerStage({
   className,
   interactive = true,
 }: BurgerStageProps) {
+  const host = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
   const [drag, setDrag] = useState(0);
   const dragging = useRef(false);
   const lastX = useRef(0);
   const [reduced, setReduced] = useState(false);
+  // Opt-in via NEXT_PUBLIC_BURGER_GLB. Checked at build time, so with no
+  // model configured the page issues no request for one.
+  const hasModel = Boolean(BURGER_GLB);
+
+  // Several stages live on one page. Rendering all of them continuously
+  // burns GPU on canvases nobody is looking at, so each one only draws
+  // while it is actually on screen.
+  useEffect(() => {
+    const el = host.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setVisible(entries[0].isIntersecting),
+      { rootMargin: "120px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -101,6 +122,7 @@ export function BurgerStage({
 
   return (
     <div
+      ref={host}
       className={className}
       onPointerDown={onDown}
       onPointerMove={onMove}
@@ -110,7 +132,8 @@ export function BurgerStage({
     >
       <Canvas
         shadows
-        dpr={[1, 2]}
+        frameloop={visible ? "always" : "never"}
+        dpr={[1, 1.75]}
         camera={{ position: [0, 0.55, 4.1], fov: 32 }}
         gl={{ antialias: true, alpha: true }}
         onCreated={({ gl }) => {
@@ -132,7 +155,29 @@ export function BurgerStage({
           <ambientLight intensity={0.25} />
 
           <group position={[0, -0.15, 0]}>
-            <BurgerModel explode={explode} explodeRef={explodeRef} spin={reduced ? 0 : spin + drag} />
+            {hasModel ? (
+              <SplineBoundary
+                fallback={
+                  <BurgerModel
+                    explode={explode}
+                    explodeRef={explodeRef}
+                    spin={reduced ? 0 : spin + drag}
+                  />
+                }
+              >
+                <BurgerGLTF
+                  explodeRef={explodeRef}
+                  spin={reduced ? 0 : spin + drag}
+                  spread={STACK_LAYOUT}
+                />
+              </SplineBoundary>
+            ) : (
+              <BurgerModel
+                explode={explode}
+                explodeRef={explodeRef}
+                spin={reduced ? 0 : spin + drag}
+              />
+            )}
             <ContactShadows
               position={[0, -0.66, 0]}
               opacity={0.55}

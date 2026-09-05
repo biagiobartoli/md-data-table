@@ -180,3 +180,51 @@ export function makeBumpTexture({
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   return tex;
 }
+
+/**
+ * Derive a tangent-space normal map from an fbm height field.
+ * Normal maps carry far more surface detail than bumpScale alone — this is
+ * what makes the bun read as crumb rather than as a smooth shaded dome.
+ */
+export function makeNormalTexture({
+  size = 512,
+  scale = 20,
+  strength = 2.4,
+}: {
+  size?: number;
+  scale?: number;
+  strength?: number;
+}) {
+  const height = new Float32Array(size * size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      height[y * size + x] = fbm3((x / size) * scale, (y / size) * scale, 4.7, 5);
+    }
+  }
+
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d")!;
+  const img = ctx.createImageData(size, size);
+  const d = img.data;
+  const at = (x: number, y: number) =>
+    height[((y + size) % size) * size + ((x + size) % size)];
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      // central differences → gradient → normal
+      const dx = (at(x + 1, y) - at(x - 1, y)) * strength;
+      const dy = (at(x, y + 1) - at(x, y - 1)) * strength;
+      const len = Math.sqrt(dx * dx + dy * dy + 1);
+      const i = (y * size + x) * 4;
+      d[i] = ((-dx / len) * 0.5 + 0.5) * 255;
+      d[i + 1] = ((-dy / len) * 0.5 + 0.5) * 255;
+      d[i + 2] = (1 / len) * 0.5 * 255 + 127.5;
+      d[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}

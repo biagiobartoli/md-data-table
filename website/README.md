@@ -99,15 +99,37 @@ to an explode value. That value is passed as a **ref**, not a prop:
 `BurgerModel` reads it inside `useFrame` and eases toward it. A prop would
 re-render the entire Canvas subtree on every scroll frame.
 
+### Dropping in a real model
+
+The stage is model-agnostic. To replace the procedural burger with a real one:
+
+1. Put the file at `public/models/burger.glb`.
+2. Set `NEXT_PUBLIC_BURGER_GLB=/models/burger.glb` in `.env.local` (see
+   `.env.example`).
+3. Restart the dev server.
+
+`src/components/three/burger-gltf.tsx` loads it, enables shadows on every
+mesh, and matches mesh names against layer hints (`patty`, `cheese`,
+`bun_top`, …) so the scroll-driven exploded view keeps working. Meshes it
+cannot identify simply stay put rather than flying off in a guessed
+direction. Lighting, shadows, drag-to-rotate and the scroll plumbing are
+unchanged.
+
+With the variable unset — the default — the loader is never mounted, so the
+page makes no request for a model that isn't there.
+
 ### Tuning it
 
 Layer positions live in the `stack` array in `burger-model.tsx` — `y` is the
 assembled rest height, `spread` is where the layer flies to when exploded.
 Colours are the `makeSurfaceTexture` calls in the same file.
 
-If you later buy or sculpt a real burger `.glb`, drop it in and swap
-`<BurgerModel />` for a `useGLTF` load; the stage, lighting, and scroll
-plumbing stay as they are.
+### Performance
+
+Three stages share one page (hero, showcase, exploded view). Each renders
+only while it is on screen — `frameloop` flips to `"never"` when an
+IntersectionObserver reports the canvas has scrolled away. Without that,
+three WebGL contexts draw continuously the whole time you are on the page.
 
 ## Images
 

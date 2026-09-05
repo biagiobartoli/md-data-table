@@ -55,6 +55,7 @@ const config: Config = {
         ember: "hsl(var(--ember))",
         cream: "hsl(var(--cream))",
         ink: "hsl(var(--ink))",
+        line: "hsl(var(--line))",
         ash: "hsl(var(--ash))",
       },
       borderRadius: {
