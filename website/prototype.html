@@ -60,7 +60,7 @@ body{
 .nav-links a:focus-visible{outline:1px solid var(--gold); outline-offset:6px; opacity:1}
 
 /* ---------- cinema / pinned stage ---------- */
-.cinema{position:relative; height:620vh}
+.cinema{position:relative; height:960vh}
 .stage{
   position:relative; height:100vh; width:100%; overflow:hidden;
   display:grid; place-items:center;
@@ -112,7 +112,13 @@ body{
   position:absolute; inset:0; width:100%; height:100%;
   display:block; user-select:none; -webkit-user-drag:none;
 }
-#p-shadow{transform-origin:50% 93%}
+/* transform-origin = each part's own centre within the shared 750x2098 canvas,
+   measured from its alpha bounding box. Without this, scaling a layer would
+   expand it about the canvas centre and throw it off axis. */
+#p-cap   {transform-origin:50.27% 11.56%}
+#p-ring  {transform-origin:50.20% 22.09%}
+#p-body  {transform-origin:49.87% 53.96%}
+#p-shadow{transform-origin:50%    93%}
 
 /* ---------- foreground editorial layer ---------- */
 .fore{position:absolute; inset:0; z-index:6; pointer-events:none}
@@ -160,6 +166,27 @@ body{
 .l4{left:58vw;  top:71vh}
 
 /* ---------- scene two (contrast panel) ---------- */
+.focus{position:absolute; inset:0; z-index:7; pointer-events:none}
+.fx{
+  position:absolute; left:56vw; top:50%; transform:translateY(-50%);
+  max-width:min(34ch,30vw); opacity:0;
+}
+.fx-idx{
+  display:block; font-size:9.5px; letter-spacing:.42em; text-transform:uppercase;
+  color:var(--gold);
+}
+.fx h3{
+  margin:18px 0 0; font-family:var(--ff-ui); font-weight:500;
+  font-size:13px; letter-spacing:.34em; text-transform:uppercase; color:var(--paper);
+}
+.fx .fx-rule{display:block; width:46px; height:1px; background:var(--gold); margin:22px 0; opacity:.7}
+.fx p{
+  font-family:var(--ff-display); font-weight:300;
+  font-size:clamp(1.05rem,1.5vw,1.45rem); line-height:1.5; letter-spacing:.005em;
+  color:#B8B3AC;
+}
+@media (max-width:860px){ .fx{left:auto; right:6vw; max-width:56vw} }
+
 .scene2{
   position:absolute; inset:0; z-index:8; background:var(--bone); color:var(--ink);
   clip-path:inset(100% 0 0 0); display:grid; place-items:center; will-change:clip-path;
@@ -263,6 +290,27 @@ body{
       <div class="tl l4 right"><span class="dot"></span><span class="rule"></span><span class="txt">24H Cold<s>Thermal hold</s></span></div>
     </div>
 
+    <div class="focus" aria-hidden="true">
+      <div class="fx" id="fx-cap">
+        <span class="fx-idx">01 / Closure</span>
+        <h3>Sealed Cap</h3>
+        <i class="fx-rule"></i>
+        <p>Precision-threaded closure designed for a tight thermal seal.</p>
+      </div>
+      <div class="fx" id="fx-ring">
+        <span class="fx-idx">02 / Transition</span>
+        <h3>Anodized Collar</h3>
+        <i class="fx-rule"></i>
+        <p>Brushed metal collar engineered as the visual and structural transition.</p>
+      </div>
+      <div class="fx" id="fx-body">
+        <span class="fx-idx">03 / Vessel</span>
+        <h3>Vacuum Body</h3>
+        <i class="fx-rule"></i>
+        <p>Double-wall stainless-steel vessel built to preserve temperature for hours.</p>
+      </div>
+    </div>
+
     <div class="scene2">
       <div class="s2-inner">
         <div class="s2-eyebrow">Chapter Two</div>
@@ -335,6 +383,8 @@ body{
   }
 
   var chars = gsap.utils.toArray('.ch');
+  gsap.set(['#p-cap','#p-ring','#p-body'], { filter: 'blur(0px)' });
+  gsap.set('.fx', { x: 20 });
   gsap.set('.tl:not(.right)', { x: -26 });
   gsap.set('.tl.right',       { x:  26 });
 
@@ -405,21 +455,64 @@ body{
   tl.to('.tl',      { opacity: 1, x: 0, duration: 7, stagger: 2.4 }, 60)
     .to('.tl .rule',{ width: 108, duration: 9, stagger: 2.4 }, 60);
 
-  /* 80-100 reassemble, then hand off to the contrast scene */
-  tl.to('.tl .rule',{ width: 0, duration: 5, stagger: 1.0 }, 78)
-    .to('.tl',      { opacity: 0, duration: 5, stagger: 1.0 }, 78.5)
-    /* reassemble first, so the viewer actually sees it close */
-    .to('#p-cap',   { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 80)
-    .to('#p-ring',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 80)
-    .to('#p-body',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 80)
-    .to('#p-shadow',{ scaleX: 1, scaleY: 1, opacity: 1, duration: 11, ease: 'power2.inOut' }, 80)
-    .to('.product', { scale: 0.72, rotationY: 0, rotationZ: 0, z: 0, yPercent: -3, duration: 12 }, 82)
-    .to('.glow',    { opacity: 0, scale: 1.6, duration: 10 }, 86)
-    .to('.glow-core',{ opacity: 0, duration: 10 }, 86)
-    .to('#p-shadow',{ opacity: 0, duration: 8 }, 88)
-    /* only then does the contrast scene take the frame */
-    .to('.scene2',  { clipPath: 'inset(0% 0 0 0)', duration: 11, ease: 'power2.inOut' }, 89)
-    .from('.s2-inner', { yPercent: 26, opacity: 0, duration: 8 }, 92);
+  /* 76-82 the technical callouts retire before the focus study begins */
+  tl.to('.tl .rule',{ width: 0, duration: 5, stagger: 1.0 }, 76)
+    .to('.tl',      { opacity: 0, duration: 5, stagger: 1.0 }, 76.5);
+
+  /* ---- 82-142 component focus: one part is hero at a time ----------------
+     The stack tracks left so the right half of the frame carries the copy.
+     Each layer scales about its own centre (transform-origin, set in CSS),
+     so a part never drifts off axis as it grows. Every beat returns the part
+     to its exploded position before the next begins, which is what keeps the
+     whole study reversible under a backward scrub. */
+  var REST  = { '#p-cap': -14, '#p-ring': -5.5, '#p-body': 3 };
+  var PARTS = ['#p-cap', '#p-ring', '#p-body'];
+  var FOCUS = [
+    /* centre = yPercent that puts this part's centre on the canvas centre.
+       Small parts need more than 1.3-1.6x to actually read as hero. */
+    { sel: '#p-cap',  txt: '#fx-cap',  centre:  38.44, scale: 2.20, rot: -2.5, at:  82 },
+    { sel: '#p-ring', txt: '#fx-ring', centre:  27.91, scale: 2.45, rot:  2.0, at: 102 },
+    { sel: '#p-body', txt: '#fx-body', centre:  -3.96, scale: 1.30, rot: -1.2, at: 122 }
+  ];
+
+  tl.to('.product',  { x: '-13vw', scale: 1.0, rotationY: 0, duration: 6 }, 82)
+    .to('#p-shadow', { opacity: 0, duration: 5 }, 82)
+    .to('.glow',     { x: '-13vw', scale: .92, opacity: .8, duration: 6 }, 82)
+    .to('.glow-core',{ x: '-13vw', scaleX: 1.05, scaleY: .52, opacity: 1.05, duration: 6 }, 82);
+
+  FOCUS.forEach(function (f) {
+    var others = PARTS.filter(function (s) { return s !== f.sel; });
+    var IN = f.at, OUT = f.at + 13;
+
+    tl.to(f.sel, { yPercent: f.centre, scale: f.scale, rotationZ: f.rot,
+                   duration: 7, ease: 'power2.inOut' }, IN)
+      /* secondary parts stay present but recede */
+      .to(others, { opacity: .16, scale: .94, filter: 'blur(2.5px)', duration: 7 }, IN)
+      .to(f.txt,  { opacity: 1, x: 0, duration: 5 }, IN + 2)
+
+      .to(f.sel, { yPercent: REST[f.sel], scale: 1, rotationZ: 0,
+                   duration: 7, ease: 'power2.inOut' }, OUT)
+      .to(others, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 7 }, OUT)
+      .to(f.txt,  { opacity: 0, x: 20, duration: 4 }, OUT);
+  });
+
+  /* 142-149 back to the full exploded view */
+  tl.to('.product',  { x: 0, scale: 0.84, duration: 7 }, 142)
+    .to('#p-shadow', { opacity: .46, duration: 7 }, 142)
+    .to('.glow',     { x: 0, scale: 1.3, opacity: .9, duration: 7 }, 142)
+    .to('.glow-core',{ x: 0, scaleX: 1, scaleY: 1.16, opacity: 1.25, duration: 7 }, 142);
+
+  /* 150-170 reassemble, then hand off to the contrast scene */
+  tl.to('#p-cap',   { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
+    .to('#p-ring',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
+    .to('#p-body',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
+    .to('#p-shadow',{ scaleX: 1, scaleY: 1, opacity: 1, duration: 11, ease: 'power2.inOut' }, 150)
+    .to('.product', { scale: 0.72, rotationY: 0, rotationZ: 0, z: 0, yPercent: -3, duration: 12 }, 152)
+    .to('.glow',    { opacity: 0, scale: 1.6, duration: 10 }, 156)
+    .to('.glow-core',{ opacity: 0, duration: 10 }, 156)
+    .to('#p-shadow',{ opacity: 0, duration: 8 }, 158)
+    .to('.scene2',  { clipPath: 'inset(0% 0 0 0)', duration: 11, ease: 'power2.inOut' }, 159)
+    .from('.s2-inner', { yPercent: 26, opacity: 0, duration: 8 }, 162);
 
   /* fonts change metrics for the giant display type — remeasure after load */
   if (document.fonts && document.fonts.ready) {
