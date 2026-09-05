@@ -60,7 +60,7 @@ body{
 .nav-links a:focus-visible{outline:1px solid var(--gold); outline-offset:6px; opacity:1}
 
 /* ---------- cinema / pinned stage ---------- */
-.cinema{position:relative; height:960vh}
+.cinema{position:relative; height:1380vh}
 .stage{
   position:relative; height:100vh; width:100%; overflow:hidden;
   display:grid; place-items:center;
@@ -471,8 +471,8 @@ body{
     /* centre = yPercent that puts this part's centre on the canvas centre.
        Small parts need more than 1.3-1.6x to actually read as hero. */
     { sel: '#p-cap',  txt: '#fx-cap',  centre:  38.44, scale: 2.20, rot: -2.5, at:  82 },
-    { sel: '#p-ring', txt: '#fx-ring', centre:  27.91, scale: 2.45, rot:  2.0, at: 102 },
-    { sel: '#p-body', txt: '#fx-body', centre:  -3.96, scale: 1.30, rot: -1.2, at: 122 }
+    { sel: '#p-ring', txt: '#fx-ring', centre:  27.91, scale: 2.45, rot:  2.0, at: 116 },
+    { sel: '#p-body', txt: '#fx-body', centre:  -3.96, scale: 1.30, rot: -1.2, at: 150 }
   ];
 
   tl.to('.product',  { x: '-13vw', scale: 1.0, rotationY: 0, duration: 6 }, 82)
@@ -482,37 +482,57 @@ body{
 
   FOCUS.forEach(function (f) {
     var others = PARTS.filter(function (s) { return s !== f.sel; });
-    var IN = f.at, OUT = f.at + 13;
+    /* 9 in, 16 holding, 9 out — the hold is what makes a beat feel presented
+       rather than passed through */
+    var IN = f.at, OUT = f.at + 25;
 
     tl.to(f.sel, { yPercent: f.centre, scale: f.scale, rotationZ: f.rot,
-                   duration: 7, ease: 'power2.inOut' }, IN)
+                   duration: 9, ease: 'power2.inOut' }, IN)
       /* secondary parts stay present but recede */
-      .to(others, { opacity: .16, scale: .94, filter: 'blur(2.5px)', duration: 7 }, IN)
-      .to(f.txt,  { opacity: 1, x: 0, duration: 5 }, IN + 2)
+      .to(others, { opacity: .16, scale: .94, filter: 'blur(2.5px)', duration: 9 }, IN)
+      .to(f.txt,  { opacity: 1, x: 0, duration: 7 }, IN + 3)
 
       .to(f.sel, { yPercent: REST[f.sel], scale: 1, rotationZ: 0,
-                   duration: 7, ease: 'power2.inOut' }, OUT)
-      .to(others, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 7 }, OUT)
-      .to(f.txt,  { opacity: 0, x: 20, duration: 4 }, OUT);
+                   duration: 9, ease: 'power2.inOut' }, OUT)
+      .to(others, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 9 }, OUT)
+      .to(f.txt,  { opacity: 0, x: 20, duration: 5 }, OUT);
   });
 
-  /* 142-149 back to the full exploded view */
-  tl.to('.product',  { x: 0, scale: 0.84, duration: 7 }, 142)
-    .to('#p-shadow', { opacity: .46, duration: 7 }, 142)
-    .to('.glow',     { x: 0, scale: 1.3, opacity: .9, duration: 7 }, 142)
-    .to('.glow-core',{ x: 0, scaleX: 1, scaleY: 1.16, opacity: 1.25, duration: 7 }, 142);
+  /* 184-194 back to the full exploded view */
+  tl.to('.product',  { x: 0, scale: 0.84, duration: 10 }, 184)
+    .to('#p-shadow', { opacity: .46, duration: 10 }, 184)
+    .to('.glow',     { x: 0, scale: 1.3, opacity: .9, duration: 10 }, 184)
+    .to('.glow-core',{ x: 0, scaleX: 1, scaleY: 1.16, opacity: 1.25, duration: 10 }, 184);
 
-  /* 150-170 reassemble, then hand off to the contrast scene */
-  tl.to('#p-cap',   { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
-    .to('#p-ring',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
-    .to('#p-body',  { yPercent: 0, duration: 11, ease: 'power2.inOut' }, 150)
-    .to('#p-shadow',{ scaleX: 1, scaleY: 1, opacity: 1, duration: 11, ease: 'power2.inOut' }, 150)
-    .to('.product', { scale: 0.72, rotationY: 0, rotationZ: 0, z: 0, yPercent: -3, duration: 12 }, 152)
-    .to('.glow',    { opacity: 0, scale: 1.6, duration: 10 }, 156)
-    .to('.glow-core',{ opacity: 0, duration: 10 }, 156)
-    .to('#p-shadow',{ opacity: 0, duration: 8 }, 158)
-    .to('.scene2',  { clipPath: 'inset(0% 0 0 0)', duration: 11, ease: 'power2.inOut' }, 159)
-    .from('.s2-inner', { yPercent: 26, opacity: 0, duration: 8 }, 162);
+  /* 194-210 the bottle reforms */
+  tl.to('#p-cap',   { yPercent: 0, duration: 16, ease: 'power2.inOut' }, 194)
+    .to('#p-ring',  { yPercent: 0, duration: 16, ease: 'power2.inOut' }, 194)
+    .to('#p-body',  { yPercent: 0, duration: 16, ease: 'power2.inOut' }, 194)
+    .to('#p-shadow',{ scaleX: 1, scaleY: 1, opacity: 1, duration: 16, ease: 'power2.inOut' }, 194)
+    /* back toward the hero scale, so the closing frame rhymes with the opening */
+    .to('.product', { scale: 0.95, rotationY: 0, rotationZ: 0, z: 0, yPercent: 0,
+                      duration: 16, ease: 'power2.inOut' }, 196);
+
+  /* 204-228 payoff: the wordmark returns behind the reformed bottle.
+     Letters travel back along the paths they left on at 40-60, outermost
+     first, so it reads as the opening composition resolving rather than a
+     new element arriving. */
+  tl.to(chars, {
+      yPercent: 0, xPercent: 0, opacity: 1,
+      duration: 22, ease: 'power3.out',
+      stagger: { each: 1.6, from: 'edges' }
+    }, 204)
+    .to('.type-back', { scale: 1.10, y: 0, duration: 24, ease: 'power2.out' }, 204)
+    .to('.glow',      { opacity: 1, scale: 1.18, duration: 20 }, 204)
+    .to('.glow-core', { opacity: 1.3, scaleY: 1.02, duration: 20 }, 204);
+
+  /* 232-248 hand off to the contrast scene */
+  tl.to('.product', { scale: 0.76, yPercent: -3, duration: 12 }, 230)
+    .to('.glow',    { opacity: 0, scale: 1.6, duration: 10 }, 232)
+    .to('.glow-core',{ opacity: 0, duration: 10 }, 232)
+    .to('#p-shadow',{ opacity: 0, duration: 8 }, 234)
+    .to('.scene2',  { clipPath: 'inset(0% 0 0 0)', duration: 12, ease: 'power2.inOut' }, 234)
+    .from('.s2-inner', { yPercent: 26, opacity: 0, duration: 8 }, 238);
 
   /* fonts change metrics for the giant display type — remeasure after load */
   if (document.fonts && document.fonts.ready) {
