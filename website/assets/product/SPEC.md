@@ -1,77 +1,43 @@
-# KELVIN K-600 — product render specification
+# KELVIN K-600 — product asset contract
 
-Layered product assets for the scroll-driven exploded-view sequence in
-`website/prototype.html`. Deliver into this folder.
+Authoritative spec, confirmed by the asset author.
 
-## Files required
+## Production layers
 
-| File | Contents |
-|---|---|
-| `bottle-body.webp` | Vessel only — shoulder, barrel, base, **including the threaded neck and mouth** normally hidden under the ring and cap |
-| `bottle-cap.webp` | Cap only, complete |
-| `bottle-ring.webp` | Neck ring / collar only, complete |
-| `bottle-shadow.webp` | Contact shadow alone — soft black on transparent, no product |
+All **750 × 2098 RGBA**, true transparency, one shared canvas and coordinate
+system. Stack with identical positioning (`position:absolute; inset:0`).
 
-## The one rule that matters most
+Order, back to front:
 
-**Render every layer from a single scene, with one camera that never moves.**
+1. `bottle-shadow.png`
+2. `bottle-body.png`   — contains the hidden threaded neck behind cap/ring
+3. `bottle-ring.png`
+4. `bottle-cap.png`
 
-Export each component on an **identical canvas**, with the component sitting in
-its **assembled position**. Stacking all four files at the same coordinates must
-reproduce the assembled bottle exactly, pixel for pixel.
+Cap and ring geometry comes from the same assembled master: **do not
+independently resize or reposition them in the neutral state.**
 
-If the camera, focal length, or framing shifts between exports, the layers will
-not align and the exploded view cannot be rebuilt in the browser.
+## References (verification only, never shipped)
 
-Do **not** move the parts apart in the render. The animation does the moving.
+- `bottle-master-reference.png` — neutral assembled state
+- `assembled-check.png`
+- `exploded-check.png`
 
-## Occlusion — the detail that is usually missed
+## Branding
 
-Each component must be **complete**, not clipped by whatever normally covers it.
+**K-600 VACUUM** throughout.
 
-When the cap lifts, the bottle's threaded neck is exposed. If the body is
-rendered with the cap on, that geometry does not exist in the file and a hole
-appears mid-animation. Render each part in isolation (hide the others), keeping
-the camera fixed.
+## Motion rules
 
-Same for the area beneath the ring.
+- Cap travels upward most, ring upward less, body subtly downward
+- Heavy, controlled motion
+- No large CSS `rotationY` on flat images — keep rotation subtle
+- `bottle-shadow.png` animates independently (scale + opacity react to movement)
 
-## Technical
+## Verifying
 
-- **Canvas:** identical for all four layers. Recommended **1000 × 2800 px**,
-  assembled product ≈ 2400 px tall, horizontally centred.
-  (Displayed at ~68vh; this covers 2× DPR on a 1440p display plus the 1.12×
-  dolly-in without softening.)
-- **Alpha:** true transparency. No matte, no keying from a black background —
-  keyed edges leave dark fringing that is very visible on this dark ground.
-- **Lens:** long — 85–135 mm equivalent, or orthographic. Minimal perspective
-  keeps the stacked layers believable. Camera at product mid-height, straight-on
-  elevation.
-- **Colour:** sRGB.
-- **Format:** WebP with alpha (quality ~90). Please also keep 16-bit PNG masters
-  so we can re-export without generation loss.
-- **No baked shadows or reflections on the parts** — the contact shadow is its
-  own layer so it can scale and fade independently.
+    python3 website/assets/product/verify.py
 
-## Lighting / art direction
-
-The scene is near-black (`#07070A`) with a warm gold key. Light the product
-**for a dark background**: bright specular rim highlights defining the silhouette
-edges, controlled falloff, deep but not crushed shadow side. A product lit for a
-white studio background will look pasted-on here.
-
-Material: brushed 18/8 stainless with a fine vertical grain, plus one gold
-anodised band (`#C89B4A`). Subtle engraved `KELVIN / K-600 VACUUM` wordmark on
-the barrel.
-
-## Optional — real rotation
-
-CSS `rotationY` on a flat image reads as a rotating card, not a rotating object.
-The current prototype keeps rotation to ~11° so it holds up.
-
-For genuine scroll-driven rotation, the industry approach is an **image
-sequence**: 36–72 frames of a turntable, same camera, `frames/000.webp …`.
-That is a separate deliverable from the layered set above and cannot be exploded —
-we would use it for a rotation beat and the layered set for the exploded view.
-
-Not required for the first integration. Say if you want it and I will spec framing.
+Checks canvas size, real alpha, per-layer bounding boxes, keying halos, and
+composites the four layers to diff against the master reference. Writes
+`_composite.png` and `_diff.png`. Must pass before integration.
