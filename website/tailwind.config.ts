@@ -53,6 +53,8 @@ const config: Config = {
           foreground: "hsl(var(--popover-foreground))",
         },
         ember: "hsl(var(--ember))",
+        cream: "hsl(var(--cream))",
+        ink: "hsl(var(--ink))",
         ash: "hsl(var(--ash))",
       },
       borderRadius: {

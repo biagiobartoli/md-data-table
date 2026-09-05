@@ -75,6 +75,40 @@ The vector burger renders underneath as the guaranteed-visible layer.
 v2.x breaks `next build` with `Can't resolve '../libs/draco/draco_decoder.js'`.
 Do not bump it to 2.x without re-verifying the build.
 
+## The 3D burger
+
+`src/components/three/` holds a real WebGL model (react-three-fiber), not an
+illustration. Everything is generated at runtime — there is no `.glb`, no
+texture download, no HDRI fetch:
+
+- **Geometry** is procedural. Bun halves are hemispheres squashed and pushed
+  along their normals by fbm noise so they read as baked dough; the patty is a
+  cylinder with an irregular rim; lettuce is a ring frilled *radially* (frilling
+  it vertically produced a sawtooth); cheese is a plane that droops past the
+  patty edge.
+- **Textures** are drawn into a `<canvas>` at runtime by `src/lib/procedural.ts`
+  (mottled colour maps plus greyscale bump companions).
+- **Lighting** is four `<Lightformer>` panels inside `<Environment>`. drei's
+  `<Environment preset="...">` streams an `.hdr` from a remote CDN — behind a
+  restrictive network that silently leaves the model unlit.
+
+### Scroll-driven exploded view
+
+`src/components/sections/stack-3d.tsx` pins for 320vh and maps scroll progress
+to an explode value. That value is passed as a **ref**, not a prop:
+`BurgerModel` reads it inside `useFrame` and eases toward it. A prop would
+re-render the entire Canvas subtree on every scroll frame.
+
+### Tuning it
+
+Layer positions live in the `stack` array in `burger-model.tsx` — `y` is the
+assembled rest height, `spread` is where the layer flies to when exploded.
+Colours are the `makeSurfaceTexture` calls in the same file.
+
+If you later buy or sculpt a real burger `.glb`, drop it in and swap
+`<BurgerModel />` for a `useGLTF` load; the stage, lighting, and scroll
+plumbing stay as they are.
+
 ## Images
 
 No stock photography is wired up. The build environment could not reach an

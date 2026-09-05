@@ -37,6 +37,10 @@
     --ash: 24 6% 11%;
 
     --radius: 0.75rem;
+
+    /* editorial surfaces — warm paper and near-black ink */
+    --cream: 34 34% 94%;
+    --ink: 24 12% 8%;
   }
 }
 
