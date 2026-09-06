@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Cormorant, Cormorant_Garamond, Montserrat } from 'next/font/google';
-import Hero from './Hero';
+import Scene from './Scene';
 import styles from './hero.module.css';
 
 const display = Cormorant({
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className={`${display.variable} ${italic.variable} ${ui.variable} ${styles.root}`}>
-      <Hero />
+      <Scene />
     </div>
   );
 }

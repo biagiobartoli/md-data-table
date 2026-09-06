@@ -47,6 +47,56 @@ export default function Hero() {
 
   return (
     <main className={styles.hero} ref={root}>
+      {/* The hero's own ground. It fades on scroll so the dissolving content
+          reveals section two behind, rather than sitting on opaque black. */}
+      <div className={styles.heroBg} aria-hidden="true" />
+
+      <svg className={styles.defs} aria-hidden="true" focusable="false">
+        <defs>
+          {/* Dust dissolve. Fine noise is pushed into alpha and thresholded, so
+              the artwork erodes into grains rather than fading; a second, much
+              coarser noise then displaces those grains so they drift instead of
+              vanishing in place. Both feTurbulence nodes have fixed parameters,
+              so the expensive noise is generated once — only the threshold and
+              the displacement scale animate. */}
+          <filter id="ni-dust" x="-5%" y="-12%" width="110%" height="124%"
+                  colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.62" numOctaves="1"
+                          seed="11" result="grain" />
+            <feColorMatrix in="grain" type="matrix" result="grainA"
+              values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      1 0 0 0 0" />
+            <feComponentTransfer in="grainA" result="cut">
+              <feFuncA id="ni-dust-cut" type="linear" slope="14" intercept="1.2" />
+            </feComponentTransfer>
+            <feComposite in="SourceGraphic" in2="cut" operator="in" result="eroded" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.009 0.021"
+                          numOctaves="2" seed="5" result="warp" />
+            <feDisplacementMap id="ni-dust-warp" in="eroded" in2="warp" scale="0"
+                               xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+
+          {/* Mobile: threshold only. Displacement over a full viewport is the
+              expensive half and is the first thing to stutter on a phone. */}
+          <filter id="ni-dust-lite" x="-3%" y="-6%" width="106%" height="112%"
+                  colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="1"
+                          seed="11" result="grain" />
+            <feColorMatrix in="grain" type="matrix" result="grainA"
+              values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      1 0 0 0 0" />
+            <feComponentTransfer in="grainA" result="cut">
+              <feFuncA id="ni-dust-cut-lite" type="linear" slope="14" intercept="1.2" />
+            </feComponentTransfer>
+            <feComposite in="SourceGraphic" in2="cut" operator="in" />
+          </filter>
+        </defs>
+      </svg>
+
       {/* Official brand lockup, repainted silver by scripts/logo-prep.py.
           Hidden rather than broken if the asset is not present yet. */}
       <div className={styles.watermark} aria-hidden="true">
@@ -71,7 +121,7 @@ export default function Hero() {
       </nav>
 
       <div className={styles.centre}>
-        <h1 className={styles.title}>
+        <h1 className={`${styles.title} ${styles.dust}`}>
           <span className={styles.srOnly}>Nicola Iovine</span>
           {WORDS.map((w, wi) => (
             <span
@@ -87,14 +137,14 @@ export default function Hero() {
             </span>
           ))}
         </h1>
-        <p className={styles.subWrap} aria-hidden="true">
+        <p className={`${styles.subWrap} ${styles.dust}`} aria-hidden="true">
           <i className={styles.rule} />
           <span className={styles.sub}>Hairdressing</span>
           <i className={styles.rule} />
         </p>
       </div>
 
-      <div className={styles.foot}>
+      <div className={`${styles.foot} ${styles.dust}`}>
         <span>Hair Design · Color · Style</span>
         <span className={styles.scroll}>Scroll</span>
       </div>
