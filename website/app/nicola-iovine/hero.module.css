@@ -204,5 +204,6 @@
 
 @media (prefers-reduced-motion:reduce){
   .ch{ transform:none }
-  .sub,.nav,.foot,  .rule{ transform:scaleX(1) }
+  .sub,.nav,.foot,.watermark{ opacity:1 }
+  .rule{ transform:scaleX(1) }
 }
