@@ -44,43 +44,13 @@
   line-height:.98; letter-spacing:-.018em;
   color:#C3C6CA;
 }
+.line{ display:block; overflow:hidden; padding-bottom:.16em; margin-bottom:-.16em }
+.lineIn{ display:block; will-change:transform }
 .head em{
   font-family:var(--ni-italic),"Times New Roman",serif;
   font-style:italic; font-weight:300; color:#8F9499;
 }
-.lead{
-  margin:clamp(22px,3vh,38px) 0 0;
-  max-width:46ch;
-  font-family:var(--ni-display),"Times New Roman",serif;
-  font-weight:300;
-  font-size:clamp(1.02rem,1.5vw,1.35rem);
-  line-height:1.62; color:#8B8F94;
-}
 
-.craft{
-  margin:clamp(38px,6vh,84px) 0 0; padding:0; list-style:none;
-  display:grid; gap:clamp(20px,3vw,48px);
-  grid-template-columns:repeat(3,1fr);
-  border-top:1px solid rgba(169,173,178,.13);
-  padding-top:clamp(22px,3vh,38px);
-}
-.craft li{ min-width:0 }
-.n{
-  font-family:var(--ni-ui),system-ui,sans-serif;
-  font-size:9px; letter-spacing:.34em; color:#6E7175;
-}
-.craft h3{
-  margin:12px 0 0;
-  font-family:var(--ni-ui),system-ui,sans-serif;
-  font-size:10.5px; font-weight:500; letter-spacing:.32em;
-  text-transform:uppercase; color:#B6B8BB;
-}
-.craft p{
-  margin:11px 0 0;
-  font-family:var(--ni-display),"Times New Roman",serif;
-  font-weight:300; font-size:clamp(.92rem,1.15vw,1.06rem);
-  line-height:1.55; color:#7D8186;
-}
 
 @media (max-width:860px){
   /* Stacked content fills the width, so a side panel would collide with it.
@@ -94,7 +64,43 @@
     mask-composite:add;
   }
   .bg img{ object-position:52% 38%; opacity:.16 }
-  .craft{ grid-template-columns:1fr; gap:24px }
-  .lead{ max-width:none }
-  .head{ font-size:clamp(2.2rem,10.5vw,3.4rem) }
+      .head{ font-size:clamp(2.2rem,10.5vw,3.4rem) }
+}
+
+.bio{
+  margin:clamp(26px,3.6vh,46px) 0 0;
+  max-width:52ch;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  font-size:clamp(1.04rem,1.42vw,1.32rem);
+  line-height:1.72; color:#8F9398;
+  will-change:transform,opacity;
+}
+
+/* Two visual footnotes, deliberately small. No card, no border, no frame —
+   the plates are feathered to alpha in the asset so they sit on the ground
+   rather than on top of it. */
+.plates{
+  margin:clamp(46px,8vh,112px) 0 0;
+  padding:0; list-style:none;
+  display:flex; align-items:flex-end;
+  gap:clamp(30px,5.4vw,84px);
+}
+.plate{ width:clamp(112px,12.6vw,182px); will-change:transform,opacity }
+.plate img{
+  display:block; width:100%; height:auto; aspect-ratio:4/5;
+  object-fit:cover; opacity:.9;
+}
+.plateLabel{
+  display:block; margin-top:14px;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:8.5px; letter-spacing:.34em; text-transform:uppercase;
+  color:#6E7175;
+}
+
+@media (max-width:720px){
+  .bio{ font-size:clamp(.98rem,4vw,1.12rem); line-height:1.7; max-width:none }
+  .plates{ margin-top:clamp(34px,5vh,54px); gap:clamp(20px,6vw,34px) }
+  .plate{ width:clamp(104px,30vw,140px) }
+  .plateLabel{ font-size:8px; letter-spacing:.26em; margin-top:11px }
 }

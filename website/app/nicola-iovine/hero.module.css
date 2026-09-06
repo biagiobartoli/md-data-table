@@ -20,7 +20,7 @@
   grid-template-rows:auto 1fr auto;
 }
 
-.scene{ position:relative; height:300svh }
+.scene{ position:relative; height:475svh }
 /* prefers-reduced-motion: no pin, so the scene must not reserve scroll for one */
 .scene[data-reduced]{ height:auto }
 .scene[data-reduced] .pin{ height:auto; overflow:visible }

@@ -6,6 +6,7 @@ import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
 import Hero from './Hero';
 import SectionTwo from './SectionTwo';
 import styles from './hero.module.css';
+import s2 from './section-two.module.css';
 
 /** Soft silver mote, drawn once and blitted — far cheaper than per-particle arcs. */
 function makeSprite(size: number) {
@@ -133,7 +134,13 @@ export default function Scene() {
         for (const el of dustEls) el.style.filter = on ? url : '';
       };
       gsap.set(two, { opacity: 0 });
-      gsap.set(`${two} > div`, { y: 38, opacity: 0 });
+      /* Section-two start states live in GSAP, not CSS: the section is already
+         at opacity 0 here, so there is no flash, and it avoids the percentage
+         transform that getComputedStyle would hand back in pixels. */
+      gsap.set(`.${s2.lineIn}`, { yPercent: 108 });
+      gsap.set(`.${s2.bio}`,    { y: 26, opacity: 0 });
+      gsap.set(`.${s2.plate}`,  { y: 44, opacity: 0, scale: 0.972 });
+      gsap.set(`.${s2.eyebrow}`,{ y: 14, opacity: 0 });
 
       /* 0-20 the hero still reads as solid, so a short scroll never costs you
          the opening frame; 20-82 erodes; the reveal lands last. */
@@ -146,8 +153,27 @@ export default function Scene() {
         .to(`.${styles.dust}`, { yPercent: -4.5, scale: 1.022, duration: 70 }, 21)
         .to(`.${styles.grain}`, { opacity: 0, duration: 44 }, 26)
         .to(`.${styles.heroBg}`, { opacity: 0, duration: 52 }, 36)
-        .to(two, { opacity: 1, duration: 32 }, 40)
-        .to(`${two} > div`, { y: 0, opacity: 1, duration: 40 }, 56);
+        .to(two, { opacity: 1, duration: 32 }, 40);
+
+      /* ---- section two, one beat at a time ------------------------------
+         Each element gets its own slice of scroll rather than a single blanket
+         fade-up, so the section reads as a composition assembling itself. */
+      tl.to(`.${s2.eyebrow}`, { y: 0, opacity: 1, duration: 16, ease: 'power2.out' }, 74)
+        /* the heading rises out of per-line masks, echoing the hero's letters */
+        .to(`.${s2.lineIn}`, {
+          yPercent: 0, duration: 30, ease: 'power3.out', stagger: 7,
+        }, 78)
+        .to(`.${s2.bio}`,   { y: 0, opacity: 1, duration: 26, ease: 'power2.out' }, 106)
+        /* the plates land separately — same language, not the same motion */
+        .to(`.${s2.plate}`, {
+          y: 0, opacity: 1, scale: 1, duration: 26, ease: 'power2.out', stagger: 18,
+        }, 128)
+        /* and keep drifting fractionally, so they feel placed rather than pasted */
+        .to(`.${s2.plate}`, { y: -14, duration: 34, stagger: 6 }, 152)
+        /* background: a very slow settle under everything */
+        .fromTo(`.${s2.bg} img`,
+          { scale: 1.085, yPercent: -2.6 },
+          { scale: 1, yPercent: 2.2, duration: 140, ease: 'none' }, 40);
 
       if (!mobile) {
         tl.to('#ni-dust-warp', { attr: { scale: 26 }, duration: 66 }, 25);
