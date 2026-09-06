@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { gsap } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
 import styles from './hero.module.css';
+import { whatsappHref } from './contact';
 
 const WORDS = ['NICOLA', 'IOVINE'];
 
@@ -112,12 +113,24 @@ export default function Hero() {
 
       <nav className={styles.nav}>
         <a className={styles.mark} href="#" aria-label="Nicola Iovine">NI</a>
-        <ul className={styles.links}>
-          <li><a href="#">Salone</a></li>
-          <li><a href="#">Servizi</a></li>
-          <li><a href="#">Gallery</a></li>
-          <li><a href="#">Contatti</a></li>
-        </ul>
+        <div className={styles.navEnd}>
+          <ul className={styles.links}>
+            <li><a href="#">Salone</a></li>
+            <li><a href="#">Servizi</a></li>
+            <li><a href="#">Gallery</a></li>
+            <li><a href="#">Contatti</a></li>
+          </ul>
+          {/* Contact, not booking: this opens a WhatsApp chat with the salon.
+              The number lives in ./contact.ts and nowhere else. */}
+          <a
+            className={styles.cta}
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Prenota
+          </a>
+        </div>
       </nav>
 
       <div className={styles.centre}>

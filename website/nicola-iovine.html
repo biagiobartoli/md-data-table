@@ -62,6 +62,27 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
 .links a{font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;font-weight:400;color:var(--dim);text-decoration:none;transition:color .5s ease}
 .links a:hover{color:var(--silver)}
 .links a:focus-visible,.mark:focus-visible{outline:1px solid var(--silver);outline-offset:7px;color:var(--silver)}
+/* The framed CTA is ~5px taller than a text link, so the nav row grows by that
+   much and the hero's centred content sits ~2.5px lower — what a framed button
+   in a flow nav does. */
+.navEnd{display:flex;align-items:center;gap:clamp(18px,2.4vw,38px)}
+/* Contact CTA. Gold is the only warm colour on the site, which is what lets a
+   9px framed label read as the primary action without needing size. */
+.cta{
+  --gold-lit:#D2B47E;
+  display:inline-block;white-space:nowrap;padding:8px 17px 7px;
+  border:1px solid rgba(176,141,87,.4);
+  font-size:9px;letter-spacing:.32em;text-transform:uppercase;font-weight:500;
+  color:#BC9C68;text-decoration:none;background-color:rgba(176,141,87,0);
+  transition:color .5s ease,border-color .5s ease,background-color .5s ease,box-shadow .5s ease;
+}
+.cta:hover{
+  color:var(--gold-lit);border-color:rgba(210,180,126,.7);
+  background-color:rgba(176,141,87,.075);
+  /* two soft, wide shadows — no tight bright ring, which is what reads as neon */
+  box-shadow:0 0 26px rgba(176,141,87,.11), inset 0 0 14px rgba(176,141,87,.06);
+}
+.cta:focus-visible{outline:1px solid var(--gold-lit);outline-offset:5px;color:var(--gold-lit);border-color:rgba(210,180,126,.7)}
 
 .centre{position:relative;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 clamp(16px,2.6vw,44px);min-height:0}
 .srOnly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -172,14 +193,28 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
   .sub{font-size:clamp(1.21rem,5.3vw,1.73rem);letter-spacing:.14em}
   .rule{width:clamp(28px,9vw,54px)}
   .nav{padding:22px 20px 0}
+  .navEnd{gap:15px}
   .links{gap:15px}
   .links a{font-size:8.5px;letter-spacing:.24em}
+  .cta{padding:7px 13px 6px;font-size:8.5px;letter-spacing:.22em;position:relative}
+  /* the frame stays small; this grows the tappable area to ~45px tall */
+  .cta::before{content:"";position:absolute;inset:-10px -7px}
   .foot{padding:0 20px 24px;font-size:8px;letter-spacing:.26em}
   .watermark{width:min(124vw,50vh);translate:-47.5% -56%}
   .watermark img{opacity:.16}
   .scrollCue::after{height:24px}
 }
-@media (max-width:400px){ .links{gap:12px} .links a{font-size:8px;letter-spacing:.2em} }
+@media (max-width:400px){
+  .navEnd{gap:13px} .links{gap:11px} .links a{font-size:8px;letter-spacing:.15em}
+  .cta{padding:6px 11px 5px;font-size:8px;letter-spacing:.18em}
+}
+/* narrower than any current phone, but the row still has to fit rather than clip */
+@media (max-width:360px){
+  .nav{padding:20px 14px 0} .navEnd{gap:8px} .links{gap:8px}
+  .links a{font-size:7.5px;letter-spacing:.1em}
+  .mark{font-size:10px;letter-spacing:.3em}
+  .cta{padding:6px 9px 5px;letter-spacing:.14em}
+}
 @media (prefers-reduced-motion:reduce){
   .ch{transform:none}
   .sub,.nav,.foot,.watermark{opacity:1}
@@ -221,10 +256,15 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
 
       <nav class="nav">
         <a class="mark" href="#" aria-label="Nicola Iovine">NI</a>
-        <ul class="links">
-          <li><a href="#">Salone</a></li><li><a href="#">Servizi</a></li>
-          <li><a href="#">Gallery</a></li><li><a href="#">Contatti</a></li>
-        </ul>
+        <div class="navEnd">
+          <ul class="links">
+            <li><a href="#">Salone</a></li><li><a href="#">Servizi</a></li>
+            <li><a href="#">Gallery</a></li><li><a href="#">Contatti</a></li>
+          </ul>
+          <!-- Contact, not booking: opens a WhatsApp chat with the salon.
+               The number is the WHATSAPP_NUMBER constant in the script below. -->
+          <a class="cta" id="cta" href="#" target="_blank" rel="noopener noreferrer">Prenota</a>
+        </div>
       </nav>
 
       <div class="centre">
@@ -297,6 +337,17 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
 (function () {
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var mobile  = matchMedia('(max-width: 860px)').matches;
+  /* ---------------------------------------------------------------------------
+   The one place the salon's WhatsApp contact is configured.
+   Format: international dialling code first, digits only — no '+', no spaces,
+   no dashes. That is what wa.me requires; anything else silently resolves to
+   WhatsApp's "invalid number" page.   +39 0185 123456 -> '390185123456'
+--------------------------------------------------------------------------- */
+  var WHATSAPP_NUMBER  = '390000000000';  // PLACEHOLDER — replace
+  var WHATSAPP_MESSAGE = 'Ciao, vorrei prenotare un appuntamento.';
+  document.getElementById('cta').href =
+    'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(WHATSAPP_MESSAGE);
+
   gsap.registerPlugin(ScrollTrigger);
 
   if (!reduced && window.Lenis) {

@@ -91,6 +91,44 @@
 .links a:focus-visible{ outline:1px solid var(--silver); outline-offset:7px; color:var(--silver) }
 .mark:focus-visible{ outline:1px solid var(--silver); outline-offset:7px }
 
+/* The nav's right-hand group: the four links plus the one thing on the page
+   that is meant to be clicked. The framed CTA is ~5px taller than a text link,
+   so the nav row grows by that much and the hero's centred content sits ~2.5px
+   lower. That is what a framed button in a flow nav does; pinning the row to a
+   hard-coded height to hide it was worse than the 2.5px. */
+.navEnd{ display:flex; align-items:center; gap:clamp(18px,2.4vw,38px) }
+
+/* Contact CTA. Gold is the only warm colour anywhere on the site, which is
+   what makes a 9px framed label read as the primary action without needing
+   size. Kept to a hairline frame and a muted fill so it sits in the nav
+   rather than on top of it. */
+.cta{
+  --gold:#B08D57;
+  --gold-lit:#D2B47E;
+  display:inline-block; white-space:nowrap;
+  padding:8px 17px 7px;
+  border:1px solid rgba(176,141,87,.4);
+  font-size:9px; letter-spacing:.32em; text-transform:uppercase; font-weight:500;
+  color:#BC9C68; text-decoration:none;
+  background-color:rgba(176,141,87,0);
+  /* Named rather than `all` so the fade-in opacity the timeline drives on the
+     nav is never caught by this transition. */
+  transition:color .5s ease, border-color .5s ease,
+             background-color .5s ease, box-shadow .5s ease;
+}
+.cta:hover{
+  color:var(--gold-lit);
+  border-color:rgba(210,180,126,.7);
+  background-color:rgba(176,141,87,.075);
+  /* Two soft, wide shadows — an ambient lift outside and a faint inner warmth.
+     No tight bright ring: that is what makes a glow read as neon. */
+  box-shadow:0 0 26px rgba(176,141,87,.11), inset 0 0 14px rgba(176,141,87,.06);
+}
+.cta:focus-visible{
+  outline:1px solid var(--gold-lit); outline-offset:5px;
+  color:var(--gold-lit); border-color:rgba(210,180,126,.7);
+}
+
 /* ---------- the hero type ---------- */
 .centre{
   position:relative; z-index:6;
@@ -193,8 +231,14 @@
   .sub{ font-size:clamp(1.21rem,5.3vw,1.73rem); letter-spacing:.14em }
   .rule{ width:clamp(28px,9vw,54px) }
   .nav{ padding:22px 20px 0 }
+  .navEnd{ gap:15px }
   .links{ gap:15px }
   .links a{ font-size:8.5px; letter-spacing:.24em }
+  .cta{ padding:7px 13px 6px; font-size:8.5px; letter-spacing:.22em }
+  /* The frame stays small, but a small frame is a bad touch target. This
+     grows the tappable area to roughly 45px tall without moving anything. */
+  .cta{ position:relative }
+  .cta::before{ content:""; position:absolute; inset:-10px -7px }
   .foot{ padding:0 20px 24px; font-size:8px; letter-spacing:.26em }
   /* Bleeding past the edges reads as a deliberate crop; contained at this
      size the mark is smaller than the two-line title and just looks lost. */
@@ -203,8 +247,21 @@
   .scroll::after{ height:24px }
   }
 @media (max-width:400px){
-  .links{ gap:12px }
-  .links a{ font-size:8px; letter-spacing:.2em }
+  .navEnd{ gap:13px }
+  .links{ gap:11px }
+  .links a{ font-size:8px; letter-spacing:.15em }
+  .cta{ padding:6px 11px 5px; font-size:8px; letter-spacing:.18em }
+}
+
+/* Narrower than any current phone, but the row still has to fit rather than
+   clip: the links give up their tracking before the CTA gives up its frame. */
+@media (max-width:360px){
+  .nav{ padding:20px 14px 0 }
+  .navEnd{ gap:8px }
+  .links{ gap:8px }
+  .links a{ font-size:7.5px; letter-spacing:.1em }
+  .mark{ font-size:10px; letter-spacing:.3em }
+  .cta{ padding:6px 9px 5px; letter-spacing:.14em }
 }
 
 @media (prefers-reduced-motion:reduce){
