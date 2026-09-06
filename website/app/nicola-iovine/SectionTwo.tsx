@@ -9,6 +9,13 @@ const CRAFT = [
 export default function SectionTwo() {
   return (
     <section className={styles.two} aria-label="Il salone">
+      {/* Baked greyscale by scripts/section2-bg.py — monochrome regardless of
+          filter support, and no per-element filter cost at runtime. It rides
+          the section's own opacity, so the dissolve timeline is untouched. */}
+      <div className={styles.bg} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/ni/section-2-bg.webp" alt="" />
+      </div>
       <div className={styles.inner}>
         <span className={styles.eyebrow}>01 — Il Salone</span>
         <h2 className={styles.head}>
