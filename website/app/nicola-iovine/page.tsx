@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant, Cormorant_Garamond, Montserrat } from 'next/font/google';
 import Scene from './Scene';
+import SectionThree from './SectionThree';
 import styles from './hero.module.css';
 
 const display = Cormorant({
@@ -25,6 +26,7 @@ export default function Page() {
   return (
     <div className={`${display.variable} ${italic.variable} ${ui.variable} ${styles.root}`}>
       <Scene />
+      <SectionThree />
     </div>
   );
 }

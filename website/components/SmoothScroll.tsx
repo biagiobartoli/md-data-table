@@ -5,6 +5,7 @@ import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { REDUCED_MOTION_QUERY } from '@/lib/motion';
+import { registerScrollLock } from '@/lib/scrollLock';
 
 /**
  * Drives Lenis from GSAP's ticker instead of its own rAF loop.
@@ -33,11 +34,16 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
       // Lag smoothing fights the smoothed scroll during heavy frames.
       gsap.ticker.lagSmoothing(0);
+
+      // So an open overlay can freeze the page; overflow:hidden alone does not
+      // stop Lenis, which owns the scroll position while it is running.
+      registerScrollLock({ lock: () => lenis?.stop(), unlock: () => lenis?.start() });
     };
 
     const stop = () => {
       if (onTick) gsap.ticker.remove(onTick);
       onTick = null;
+      registerScrollLock(null);
       lenis?.destroy();
       lenis = null;
       gsap.ticker.lagSmoothing(500, 33);
