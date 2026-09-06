@@ -8,11 +8,14 @@ const BRANDS = [
 export default function SectionTwo() {
   return (
     <section className={styles.two} aria-label="Il salone">
-      {/* Baked greyscale by scripts/section2-bg.py — monochrome regardless of
-          filter support, and no per-element filter cost at runtime. */}
+      {/* Baked by scripts/section2-bg.py at --saturation 0.68: muted and
+          flattened, but deliberately NOT monochrome — the ash tones are what
+          the shot is about, and draining them costs the image its subject.
+          Baked rather than filtered so the treatment is identical everywhere
+          and costs nothing per frame. */}
       <div className={styles.bg} aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/ni/section-2-bg.webp" alt="" />
+        <img src="/ni/section-2-hair.webp" alt="" />
       </div>
 
       <div className={styles.inner}>

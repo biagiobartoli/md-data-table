@@ -154,6 +154,7 @@ export default function Scene() {
       gsap.set(`.${s2.bio}`,    { y: 26, opacity: 0 });
       gsap.set(`.${s2.plate}`,  { y: 44, opacity: 0, scale: 0.972 });
       gsap.set(`.${s2.eyebrow}`,{ y: 14, opacity: 0 });
+      gsap.set(`.${s2.bg}`,     { opacity: 0, xPercent: 3 });
 
       /* 0-20 the hero still reads as solid, so a short scroll never costs you
          the opening frame; 20-82 erodes; the reveal lands last. */
@@ -183,7 +184,14 @@ export default function Scene() {
         }, 128)
         /* and keep drifting fractionally, so they feel placed rather than pasted */
         .to(`.${s2.plate}`, { y: -14, duration: 34, stagger: 6 }, 152)
-        /* background: a very slow settle under everything */
+        /* The image establishes the space before the type lands on it: it
+           arrives on its own beat between the ground and the eyebrow, easing
+           in from the right edge it is anchored to. Restrained on purpose —
+           the panel is a setting, not an event. */
+        .to(`.${s2.bg}`, {
+          opacity: 1, xPercent: 0, duration: 44, ease: 'power2.out',
+        }, 58)
+        /* and then a very slow settle under everything, for depth */
         .fromTo(`.${s2.bg} img`,
           { scale: 1.085, yPercent: -2.6 },
           { scale: 1, yPercent: 2.2, duration: 140, ease: 'none' }, 40);
