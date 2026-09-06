@@ -5,7 +5,7 @@
   display:grid; place-items:center;
   padding:0 clamp(20px,5vw,88px);
   background:
-    radial-gradient(120% 78% at 50% -8%, #17171A 0%, #0E0E11 42%, #0A0A0C 100%);
+    radial-gradient(120% 78% at 50% -8%, #15191B 0%, #0D0F10 42%, #0A0B0C 100%);
   color:#A9ADB2;
 }
 .inner{ position:relative; z-index:1; width:min(1180px,100%); }
@@ -34,7 +34,8 @@
 .eyebrow{
   display:block;
   font-family:var(--ni-ui),system-ui,sans-serif;
-  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase; color:#7E8288;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase;
+  color:#7E9799;
 }
 .head{
   margin:clamp(20px,2.6vh,34px) 0 0;
@@ -48,7 +49,7 @@
 .lineIn{ display:block; will-change:transform }
 .head em{
   font-family:var(--ni-italic),"Times New Roman",serif;
-  font-style:italic; font-weight:300; color:#8F9499;
+  font-style:italic; font-weight:300; color:#9FB6B6;
 }
 
 
@@ -80,7 +81,13 @@
 /* Two visual footnotes, deliberately small. No card, no border, no frame —
    the plates are feathered to alpha in the asset so they sit on the ground
    rather than on top of it. */
+.plates::before{
+  content:""; position:absolute; top:calc(-1 * clamp(24px,4vh,54px)); left:0;
+  width:46px; height:1px;
+  background:linear-gradient(90deg, rgba(111,159,163,.72), rgba(111,159,163,0));
+}
 .plates{
+  position:relative;
   margin:clamp(46px,8vh,112px) 0 0;
   padding:0; list-style:none;
   display:flex; align-items:flex-end;
@@ -95,7 +102,7 @@
   display:block; margin-top:14px;
   font-family:var(--ni-ui),system-ui,sans-serif;
   font-size:8.5px; letter-spacing:.34em; text-transform:uppercase;
-  color:#6E7175;
+  color:#7C9092;
 }
 
 @media (max-width:720px){

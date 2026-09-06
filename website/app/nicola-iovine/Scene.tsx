@@ -8,22 +8,31 @@ import SectionTwo from './SectionTwo';
 import styles from './hero.module.css';
 import s2 from './section-two.module.css';
 
-/** Soft silver mote, drawn once and blitted — far cheaper than per-particle arcs. */
-function makeSprite(size: number) {
+/** Soft mote, drawn once and blitted — far cheaper than per-particle arcs.
+ *  Two variants: silver for most of the dust, and a cool one for a minority,
+ *  so the cloud picks up a faint tint without reading as coloured. */
+function makeSprite(size: number, cool = false) {
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const g = c.getContext('2d')!;
   const r = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  r.addColorStop(0, 'rgba(178,182,187,0.55)');
-  r.addColorStop(0.3, 'rgba(158,162,168,0.2)');
-  r.addColorStop(0.62, 'rgba(140,145,151,0.06)');
-  r.addColorStop(1, 'rgba(130,135,141,0)');
+  if (cool) {
+    r.addColorStop(0, 'rgba(150,190,193,0.52)');
+    r.addColorStop(0.3, 'rgba(128,168,172,0.19)');
+    r.addColorStop(0.62, 'rgba(112,150,154,0.06)');
+    r.addColorStop(1, 'rgba(105,140,144,0)');
+  } else {
+    r.addColorStop(0, 'rgba(178,182,187,0.55)');
+    r.addColorStop(0.3, 'rgba(158,162,168,0.2)');
+    r.addColorStop(0.62, 'rgba(140,145,151,0.06)');
+    r.addColorStop(1, 'rgba(130,135,141,0)');
+  }
   g.fillStyle = r;
   g.fillRect(0, 0, size, size);
   return c;
 }
 
-type Mote = { x: number; y: number; dx: number; dy: number; s: number; a: number; phase: number };
+type Mote = { x: number; y: number; dx: number; dy: number; s: number; a: number; phase: number; cool: boolean };
 
 export default function Scene() {
   const scene = useRef<HTMLDivElement>(null);
@@ -51,6 +60,7 @@ export default function Scene() {
       const g = cv.getContext('2d', { alpha: true })!;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const sprite = makeSprite(mobile ? 26 : 34);
+      const spriteCool = makeSprite(mobile ? 26 : 34, true);
       let motes: Mote[] = [];
       let W = 0, H = 0;
 
@@ -75,6 +85,8 @@ export default function Scene() {
             s: (mobile ? 5 : 7) + Math.random() * (mobile ? 8 : 13),
             a: 0.07 + Math.random() * 0.2,
             phase: Math.random(),
+            /* roughly one mote in five carries the tint */
+            cool: Math.random() < 0.22,
           };
         });
       };
@@ -89,7 +101,8 @@ export default function Scene() {
           if (a <= 0.004) continue;
           const s = m.s * (0.85 + local * 0.5);
           g.globalAlpha = a;
-          g.drawImage(sprite, m.x + m.dx * local - s / 2, m.y - m.dy * local - s / 2, s, s);
+          g.drawImage(m.cool ? spriteCool : sprite,
+            m.x + m.dx * local - s / 2, m.y - m.dy * local - s / 2, s, s);
         }
         g.globalAlpha = 1;
       };

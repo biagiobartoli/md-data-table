@@ -3,8 +3,13 @@
   --silver:#A9ADB2;
   --silver-lo:#94989D;
   --silver-hi:#C0C3C6;
-  --sub:#B6B8BB;
+  --sub:#B4B9BC;
   --dim:#6E7175;
+  /* Secondary palette. Used sparingly and never as a fill — these carry hue
+     into small details, undertones and motion, not into surfaces. */
+  --accent:#6F9FA3;
+  --accent-2:#789486;
+  --accent-soft:#B7C8C8;
   background:var(--ink);
   color:var(--silver);
   min-height:100svh;
@@ -124,7 +129,7 @@
      ancestor cannot paint through the overflow:hidden masks below it, which
      renders every letter fully transparent. The gradient is purely vertical and
      the caps share a baseline, so per-glyph is visually identical to one sweep. */
-  background:linear-gradient(180deg,#8F9398 0%,#A9ADB2 30%,#C4C7CA 54%,#9DA1A6 80%,#85898E 100%);
+  background:linear-gradient(180deg,#8C9398 0%,#A6ADB3 30%,#C0C7CA 54%,#99A1A5 80%,#82888D 100%);
   -webkit-background-clip:text; background-clip:text;
   -webkit-text-fill-color:transparent; color:transparent;
 }
@@ -140,7 +145,7 @@
 }
 .rule{
   display:block; width:clamp(38px,6vw,96px); height:1px;
-  background:linear-gradient(90deg,transparent,rgba(169,173,178,.5),transparent);
+  background:linear-gradient(90deg,transparent,rgba(151,177,179,.52),transparent);
   transform:scaleX(0); will-change:transform;
 }
 .sub{
