@@ -53,7 +53,7 @@ export default function Hero() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           ref={logo}
-          src="/ni/logo.webp"
+          src="/ni/logo-mono.webp"
           alt=""
           onError={(e) => { e.currentTarget.style.display = 'none'; }}
         />

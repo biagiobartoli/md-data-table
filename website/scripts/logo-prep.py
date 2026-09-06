@@ -41,14 +41,19 @@ def main() -> int:
     a = np.asarray(im).astype(np.float32) / 255.0
     rgb, src_a = a[:, :, :3], a[:, :, 3]
 
-    # perceptual luminance
-    lum = rgb[:, :, 0] * 0.2126 + rgb[:, :, 1] * 0.7152 + rgb[:, :, 2] * 0.0722
-
-    # dark ink -> opaque, pale ground -> clear, with a smooth ramp between so
-    # antialiased edges keep real partial alpha
-    alpha = (args.white - lum) / max(args.white - args.black, 1e-6)
-    alpha = np.clip(alpha, 0.0, 1.0) * args.max_alpha
-    alpha *= src_a                       # respect any alpha the source already had
+    # Two kinds of source. If the file already carries a real alpha channel,
+    # that matting is authoritative — trust it. Only fall back to luminance
+    # keying for flat artwork delivered as dark ink on a pale ground, where
+    # deriving alpha from darkness is the only way to get clean edges.
+    has_alpha = float((src_a < 0.98).mean()) > 0.02
+    if has_alpha:
+        alpha = src_a * args.max_alpha
+        mode = 'existing alpha channel'
+    else:
+        lum = rgb[:, :, 0] * 0.2126 + rgb[:, :, 1] * 0.7152 + rgb[:, :, 2] * 0.0722
+        alpha = (args.white - lum) / max(args.white - args.black, 1e-6)
+        alpha = np.clip(alpha, 0.0, 1.0) * args.max_alpha
+        mode = 'luminance key'
 
     tone = np.array(hex_rgb(args.tone), dtype=np.float32) / 255.0
     out = np.zeros_like(a)
@@ -71,6 +76,7 @@ def main() -> int:
     soft = float(((alpha > 0.02) & (alpha < 0.98)).mean() * 100)
     print(f'source     {im.size[0]}x{im.size[1]}')
     print(f'cropped    {img.size[0]}x{img.size[1]}  aspect {img.size[0]/img.size[1]:.4f}')
+    print(f'matting    {mode}')
     print(f'ink cover  {cov:.2f}%   soft edge {soft:.2f}%   tone #{args.tone}')
     print(f'wrote      {png} ({png.stat().st_size/1024:.1f} KB)')
     print(f'wrote      {webp} ({webp.stat().st_size/1024:.1f} KB)')

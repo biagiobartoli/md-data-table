@@ -23,8 +23,14 @@
 /* ---------- logo watermark: the only background element ---------- */
 .watermark{
   position:absolute; z-index:1; opacity:0;
-  left:50%; top:50%; translate:-50% -50%;
-  width:min(74vh,58vw); aspect-ratio:1/1;
+  left:50%; top:50%;
+  /* Optical centring, not geometric. The monogram's mass sits 11.3% of its
+     height below and 3.8% of its width left of the bounding-box centre — the
+     script's heavy lower strokes outweigh the small raised dot. Corrected
+     fully on x, and about 60% on y: a full y correction over-reads, because
+     the eye registers the silhouette's extent as well as its mass. */
+  translate:-46.2% -57%;
+  width:min(62vw,88vh); aspect-ratio:1203/761;
   pointer-events:none; user-select:none;
 }
 .watermark img{
@@ -167,8 +173,10 @@
   .links{ gap:15px }
   .links a{ font-size:8.5px; letter-spacing:.24em }
   .foot{ padding:0 20px 24px; font-size:8px; letter-spacing:.26em }
-  .watermark{ width:min(46vh,86vw) }
-  .watermark img{ opacity:.13 }
+  /* Bleeding past the edges reads as a deliberate crop; contained at this
+     size the mark is smaller than the two-line title and just looks lost. */
+  .watermark{ width:min(124vw,50vh); translate:-47.5% -56% }
+  .watermark img{ opacity:.16 }
   .scroll::after{ height:24px }
   }
 @media (max-width:400px){
