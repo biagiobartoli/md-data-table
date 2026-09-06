@@ -9,8 +9,14 @@ const WORDS = ['NICOLA', 'IOVINE'];
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  const logo = useRef<HTMLImageElement>(null);
 
   useIsomorphicLayoutEffect(() => {
+    /* A 404 can resolve before React attaches onError, so re-check on mount:
+       a broken image reports complete with naturalWidth 0. */
+    const img = logo.current;
+    if (img && img.complete && img.naturalWidth === 0) img.style.display = 'none';
+
     const ctx = gsap.context(() => {
       /* The CSS start state is translateY(102%), but getComputedStyle reports a
          matrix in pixels, so GSAP reads it as y:146px / yPercent:0 and tweening
@@ -21,13 +27,14 @@ export default function Hero() {
         gsap.set(`.${styles.ch}`, { yPercent: 0 });
         gsap.set(`.${styles.sub}`, { opacity: 1, y: 0 });
         gsap.set(`.${styles.rule}`, { scaleX: 1 });
-        gsap.set([`.${styles.nav}`, `.${styles.foot}`], { opacity: 1 });
+        gsap.set([`.${styles.nav}`, `.${styles.foot}`, `.${styles.watermark}`], { opacity: 1 });
         return;
       }
 
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      tl.to(`.${styles.ch}`, {
+      tl.to(`.${styles.watermark}`, { opacity: 1, duration: 2.8, ease: 'power2.out' }, 0)
+        .to(`.${styles.ch}`, {
           yPercent: 0, duration: 1.9, stagger: { each: 0.055, from: 'start' },
         }, 0.25)
         .to(`.${styles.sub}`, { opacity: 1, y: 0, duration: 1.8 }, 1.45)
@@ -40,6 +47,18 @@ export default function Hero() {
 
   return (
     <main className={styles.hero} ref={root}>
+      {/* Official brand lockup, repainted silver by scripts/logo-prep.py.
+          Hidden rather than broken if the asset is not present yet. */}
+      <div className={styles.watermark} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          ref={logo}
+          src="/ni/logo.webp"
+          alt=""
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
+      </div>
+
 
       <nav className={styles.nav}>
         <a className={styles.mark} href="#" aria-label="Nicola Iovine">NI</a>
