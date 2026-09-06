@@ -20,30 +20,12 @@
   grid-template-rows:auto 1fr auto;
 }
 
-/* ---------- atmosphere ---------- */
-.halo{
-  position:absolute; z-index:1; opacity:0;
-  left:50%; top:48%; transform:translate(-50%,-50%);
-  width:104vw; height:62vh; pointer-events:none;
-  background:radial-gradient(ellipse at 50% 50%,
-    rgba(196,200,206,.075) 0%, rgba(160,165,172,.032) 38%,
-    rgba(120,125,132,.012) 62%, transparent 78%);
-  filter:blur(22px);
-}
-.strands{
-  position:absolute; inset:0; z-index:2;
-  width:100%; height:100%; pointer-events:none;
-}
-.strand{ will-change:stroke-dashoffset }
+/* ---------- surface ---------- */
 
 .grain{
-  position:absolute; inset:-50%; z-index:9; pointer-events:none; opacity:.13;
+  position:absolute; inset:-50%; z-index:9; pointer-events:none; opacity:.055;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   mix-blend-mode:overlay;
-}
-.vignette{
-  position:absolute; inset:0; z-index:8; pointer-events:none;
-  background:radial-gradient(122% 92% at 50% 46%, transparent 42%, rgba(0,0,0,.62) 100%);
 }
 
 /* ---------- navigation ---------- */
@@ -172,8 +154,7 @@
   .links a{ font-size:8.5px; letter-spacing:.24em }
   .foot{ padding:0 20px 24px; font-size:8px; letter-spacing:.26em }
   .scroll::after{ height:24px }
-  .halo{ width:130vw; height:44vh }
-}
+  }
 @media (max-width:400px){
   .links{ gap:12px }
   .links a{ font-size:8px; letter-spacing:.2em }
@@ -181,6 +162,5 @@
 
 @media (prefers-reduced-motion:reduce){
   .ch{ transform:none }
-  .sub,.nav,.foot,.halo{ opacity:1 }
-  .rule{ transform:scaleX(1) }
+  .sub,.nav,.foot,  .rule{ transform:scaleX(1) }
 }
