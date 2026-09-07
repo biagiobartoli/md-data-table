@@ -1,0 +1,238 @@
+/* ---------------------------------------------------------------------------
+   Section four — TRATTAMENTI.
+   A pinned campaign stage carrying three poster panels, then the editorial
+   service list. Every animated property is a transform or an opacity.
+--------------------------------------------------------------------------- */
+.four{
+  position:relative;
+  background:#050505;
+  color:#A9ADB2;
+  /* The pin consumes the first ~3.6 screens; the rest is the list block. */
+}
+
+.pin{
+  position:relative;
+  height:100svh; width:100%;
+  overflow:hidden;
+}
+.stage{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  /* Horizontal padding only. The title and the rail are overlaid on the
+     stage rather than stacked above and below it, so vertical padding would
+     buy nothing and cost the poster its height. */
+  padding:0 clamp(20px,5vw,80px);
+  background:radial-gradient(120% 90% at 50% 8%, #0E1113 0%, #08090A 52%, #050505 100%);
+}
+
+/* ---------- the poster ----------
+   A fixed 4/5 box the panels slide through. Sizing it from viewport height
+   rather than width is what keeps it a poster instead of a banner: it stays
+   the same shape and the same share of the screen at every aspect ratio. */
+.poster{
+  position:relative;
+  /* As tall as the stage will allow. A campaign panel that does not dominate
+     the screen is a thumbnail, and 74svh — where this started — left it at
+     about a third of a 1440px viewport. */
+  height:min(88svh, 128vw);
+  aspect-ratio:4/5;
+  z-index:1;
+  /* The frame clips its own panels. Without this a waiting panel shows a
+     strip of itself below the poster before it enters, and a leaving one
+     shows above — and the illusion the section depends on is that these are
+     boards moving through one fixed frame, not images sliding around a page. */
+  overflow:hidden;
+}
+.panel{
+  position:absolute; inset:0;
+  overflow:hidden;
+  will-change:transform;
+  /* A hairline edge and a deep drop: the panel reads as a physical board
+     hanging in the dark rather than as a rectangle of pixels. */
+}
+/* The frame's edge and shadow belong to the frame, not to the panels: on the
+   panels they would slide away with them. */
+.poster::after{
+  content:""; position:absolute; inset:0; z-index:30; pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(190,200,204,.09);
+}
+.poster{ box-shadow:0 40px 90px rgba(0,0,0,.62) }
+.panelIn{ position:absolute; inset:0; will-change:transform }
+.panel img{
+  display:block; width:100%; height:100%;
+  object-fit:cover; object-position:var(--pos);
+  will-change:transform;
+}
+
+/* ---------- TRATTAMENTI ---------- */
+.titleWrap{
+  position:absolute; z-index:20;
+  left:clamp(20px,5vw,80px); right:clamp(20px,5vw,80px);
+  top:50%; translate:0 -50%;
+  display:flex; flex-direction:column; align-items:center; gap:clamp(14px,2.2vh,28px);
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+.eyebrow{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase;
+  color:#7E9799;
+  will-change:transform,opacity;
+}
+.title{
+  margin:0; display:flex; justify-content:center;
+  perspective:900px;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  /* Sized to run nearly edge to edge: eleven letters is a long word, and the
+     whole point is that it arrives at full width. */
+  font-size:clamp(2.4rem,9.6vw,9.4rem);
+  line-height:.94; letter-spacing:.005em;
+  color:#C8CCCF; white-space:nowrap;
+}
+.mask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.ch{ display:block; will-change:transform; transform-style:preserve-3d }
+
+/* ---------- the rail ---------- */
+.rail{
+  position:absolute; z-index:20;
+  left:clamp(20px,5vw,80px); right:clamp(20px,5vw,80px);
+  bottom:clamp(22px,4vh,44px);
+  display:flex; align-items:baseline; justify-content:space-between;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.4em; text-transform:uppercase;
+  color:#7E9799; pointer-events:none;
+  will-change:opacity;
+}
+.count{ display:flex; align-items:baseline; gap:.7em; color:#A9ADB2 }
+/* The counter rolls rather than swaps: one number leaves as the next arrives,
+   inside a mask the height of a single digit pair. */
+.countTrack{ position:relative; display:block; width:2.2em; height:1.15em; overflow:hidden }
+.countN{
+  position:absolute; inset:0; display:block;
+  will-change:transform;
+}
+.countTotal{ color:#6E7175 }
+.railLabel{ color:#7E9799 }
+
+/* ---------- TUTTI I TRATTAMENTI + the list ---------- */
+.listBlock{
+  position:relative; z-index:1;
+  padding:clamp(70px,10vh,124px) clamp(20px,5vw,80px) clamp(76px,11vh,140px);
+  background:linear-gradient(180deg, #050505 0%, #0A0C0D 34%, #08090A 100%);
+}
+.listTitle{
+  margin:0 auto clamp(40px,6vh,86px);
+  width:min(1180px,100%);
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  font-size:clamp(2.5rem,9.4vw,8.6rem);
+  line-height:.94; letter-spacing:-.005em;
+  color:#C8CCCF;
+}
+.listLine{ display:flex; perspective:900px }
+.listMask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.listCh{ display:block; will-change:transform; white-space:pre }
+
+/* Narrower than the heading above it. Run to the full 1280 and the name and
+   the price stop being a pair — they read as two separate columns with a lot
+   of nothing between them. */
+.list{
+  width:min(940px,100%); margin:0 auto; padding:0; list-style:none;
+}
+/* Rows, not cards and not a table: a name, a price, and a hairline that only
+   exists while the eye is on it. */
+.row{
+  position:relative;
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:clamp(18px,4vw,80px);
+  padding:clamp(15px,2.1vh,23px) 0;
+  will-change:transform,opacity;
+  transition:color .45s ease;
+}
+.rowLine{
+  position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:linear-gradient(90deg, rgba(169,173,178,.16), rgba(169,173,178,.07) 60%, transparent);
+  transform:scaleX(0); transform-origin:left center;
+  will-change:transform;
+}
+.rowName{
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  font-size:clamp(1.24rem,2.5vw,2.05rem);
+  letter-spacing:.005em; color:#9EA3A8;
+  transition:color .45s ease, transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.rowPrice{
+  display:flex; align-items:baseline; gap:.34em;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-weight:300; font-size:clamp(.98rem,1.5vw,1.24rem);
+  letter-spacing:.05em; color:#8A8F94; white-space:nowrap;
+  transition:color .45s ease, transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.rowCur{ color:#6F9FA3; opacity:.72; transition:opacity .45s ease }
+.rowNote{
+  font-family:var(--ni-italic),"Times New Roman",serif;
+  font-style:italic; font-size:.92em; letter-spacing:.02em; color:#6E7175;
+  transition:color .45s ease;
+}
+
+@media (hover:hover){
+  .row:hover .rowName{ color:#D2D6D9; transform:translateX(9px) }
+  .row:hover .rowPrice{ color:#C2C6CA; transform:translateX(-4px) }
+  .row:hover .rowNote{ color:#8CA5A6 }
+  .row:hover .rowCur{ opacity:1 }
+  .row:hover .rowLine{
+    background:linear-gradient(90deg, rgba(111,159,163,.6), rgba(169,173,178,.12) 62%, transparent);
+  }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width:860px){
+  .stage{ padding:0 16px }
+  /* Wider share of the screen, because a phone viewport is already a poster
+     shape — sizing off height here would leave the panel stranded in the
+     middle of a tall black frame. */
+  /* Taller than the 4/5 desktop box. A phone viewport is far taller than it
+     is wide, so a 4/5 poster sized off the width leaves it stranded at about
+     half the screen height with black above and below. 5/7 trims roughly 9%
+     of the width — symmetric, and these are centred portrait shots, so no
+     face or length of hair is touched — and buys back the height. */
+  .poster{ height:auto; width:min(94vw, 64svh); aspect-ratio:5/7 }
+  .panel img{ object-position:var(--posM) }
+  .poster{ box-shadow:0 22px 54px rgba(0,0,0,.6) }
+  .title{ font-size:clamp(1.72rem,8.4vw,2.8rem); letter-spacing:0 }
+  .titleWrap{ left:14px; right:14px; gap:12px }
+  .eyebrow{ font-size:8.5px; letter-spacing:.3em }
+  .rail{ left:16px; right:16px; bottom:16px; font-size:8.5px; letter-spacing:.26em }
+
+  .listBlock{ padding:clamp(64px,10vh,96px) 20px clamp(80px,13vh,120px) }
+  .listTitle{ font-size:clamp(1.9rem,10.6vw,3.1rem); margin-bottom:clamp(30px,5vh,52px) }
+  .row{ padding:15px 0; gap:14px }
+  .rowName{ font-size:clamp(1.02rem,4.6vw,1.24rem) }
+  .rowPrice{ font-size:clamp(.82rem,3.4vw,.95rem); letter-spacing:.04em }
+}
+
+/* Reduced motion: the pin is dropped in JS, so the stage has to become a
+   normal flow of three posters rather than three stacked absolute panels. */
+.four[data-reduced] .pin{ height:auto; overflow:visible }
+.four[data-reduced] .stage{
+  position:relative; inset:auto;
+  display:flex; flex-direction:column; align-items:center; gap:clamp(36px,7vh,90px);
+}
+.four[data-reduced] .poster{
+  height:auto; width:min(70vw,520px); aspect-ratio:4/5;
+  display:contents;
+}
+.four[data-reduced] .panel{
+  position:relative; inset:auto;
+  width:min(70vw,520px); aspect-ratio:4/5;
+}
+.four[data-reduced] .panelIn{ position:absolute; inset:0 }
+.four[data-reduced] .titleWrap{
+  position:relative; inset:auto; translate:none; order:-1;
+}
+.four[data-reduced] .rail{ position:relative; inset:auto; width:min(70vw,520px) }
+.four[data-reduced] .countTrack{ width:auto; height:auto; overflow:visible }
+.four[data-reduced] .countN{ position:relative; inset:auto; display:none }
+.four[data-reduced] .countN:first-child{ display:block }
