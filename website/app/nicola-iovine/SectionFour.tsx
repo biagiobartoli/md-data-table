@@ -3,160 +3,104 @@
 import { useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
-import { PANELS, SERVICES, TITLE, LIST_TITLE } from './treatments';
+import { PANELS, COLUMNS, TITLE, LIST_TITLE } from './treatments';
 import styles from './section-four.module.css';
 
-/* The campaign runs on one pinned stage and a single 1000-unit timeline, so
-   every beat is a scroll position rather than a duration and the whole thing
-   reverses exactly. The panels are three nested boxes each:
+/* One composition, one screen. The photographs are a backdrop that changes on
+   its own clock, not on the scroll position; scroll only brings the section's
+   content in, once. */
 
-     .panel      the mask. Travels vertically; overflow hidden.
-     .panelIn    counter-travels, so the photograph stays optically anchored
-                 while its frame slides past — this is what makes it read as a
-                 physical advertising panel rather than a sliding image.
-     img         the slow campaign motion: scale and drift while it is held.
-
-   All three are composited transforms. */
-
-const HOLD = [
-  /* enter, settled-from, settled-to, exit — in timeline units out of 1000. */
-  { in: 150, from: 230, to: 380, out: 450 },
-  { in: 420, from: 500, to: 640, out: 710 },
-  { in: 680, from: 760, to: 930, out: 1000 },
-];
+const HOLD = 4.5;   // seconds a photograph is held
+const FADE = 1.15;  // seconds of crossfade between them
 
 export default function SectionFour() {
   const root = useRef<HTMLElement>(null);
-  const pin = useRef<HTMLDivElement>(null);
-  const listRoot = useRef<HTMLDivElement>(null);
 
   useIsomorphicLayoutEffect(() => {
     const reduced = prefersReducedMotion();
-    const mobile = window.matchMedia('(max-width: 860px)').matches;
 
     const ctx = gsap.context(() => {
+      const layers = gsap.utils.toArray<HTMLElement>(`.${styles.layer}`);
+      const imgs = gsap.utils.toArray<HTMLElement>(`.${styles.layer} img`);
       const chars = gsap.utils.toArray<HTMLElement>(`.${styles.ch}`);
-      const panels = gsap.utils.toArray<HTMLElement>(`.${styles.panel}`);
-      const ins = gsap.utils.toArray<HTMLElement>(`.${styles.panelIn}`);
-      const imgs = gsap.utils.toArray<HTMLElement>(`.${styles.panel} img`);
-      const counts = gsap.utils.toArray<HTMLElement>(`.${styles.countN}`);
 
-      /* ---------- start states ---------------------------------------- */
-      const mid = (chars.length - 1) / 2;
-      chars.forEach((ch, i) => {
-        gsap.set(ch, { yPercent: 120, x: (i - mid) * (mobile ? 9 : 26), z: -70 });
-      });
-      gsap.set(`.${styles.eyebrow}`, { opacity: 0, y: 12 });
-      gsap.set(`.${styles.rail}`, { opacity: 0 });
-      panels.forEach((p, i) => {
-        gsap.set(p, { yPercent: 100 });
-        gsap.set(ins[i], { yPercent: -100 });
-        gsap.set(imgs[i], { scale: 1.06, yPercent: -1.6 });
-      });
-      gsap.set(counts, { yPercent: 100 });
-      gsap.set(counts[0], { yPercent: 0 });
+      /* ---- entrance ------------------------------------------------- */
+      gsap.set(chars, { yPercent: 118, x: 14 });
+      gsap.set([`.${styles.eyebrow}`, `.${styles.listLabel}`], { opacity: 0, y: 10 });
+      gsap.set(`.${styles.row}`, { opacity: 0, y: 12 });
+      gsap.set(`.${styles.rule}`, { scaleX: 0 });
+
+      const show = () => {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        tl.to(`.${styles.eyebrow}`, { opacity: 1, y: 0, duration: 0.9 }, 0)
+          .to(chars, {
+            yPercent: 0, x: 0, duration: 1.25, stagger: 0.045,
+          }, 0.15)
+          .to(`.${styles.rule}`, { scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, 0.75)
+          .to(`.${styles.listLabel}`, { opacity: 1, y: 0, duration: 0.8 }, 0.95)
+          /* The list arrives as one quiet block, not fourteen separate events —
+             it is the section's footnote, not its headline. */
+          .to(`.${styles.row}`, {
+            opacity: 1, y: 0, duration: 0.7, stagger: 0.028,
+          }, 1.1);
+        return tl;
+      };
 
       if (reduced) {
-        /* No pin and no scrub: the stage collapses and the three panels become
-           a plain vertical run, so nothing can be stranded at opacity 0. */
-        root.current?.setAttribute('data-reduced', 'true');
-        gsap.set(chars, { yPercent: 0, x: 0, z: 0 });
-        gsap.set([`.${styles.eyebrow}`, `.${styles.rail}`], { opacity: 1, y: 0 });
-        panels.forEach((p, i) => {
-          gsap.set(p, { yPercent: 0 });
-          gsap.set(ins[i], { yPercent: 0 });
-          gsap.set(imgs[i], { scale: 1, yPercent: 0 });
-        });
-        gsap.set(counts, { yPercent: 0 });
-        gsap.set(`.${styles.listCh}`, { yPercent: 0, x: 0 });
-        gsap.set(`.${styles.row}`, { opacity: 1, y: 0 });
-        gsap.set(`.${styles.rowLine}`, { scaleX: 1 });
+        gsap.set(chars, { yPercent: 0, x: 0 });
+        gsap.set([`.${styles.eyebrow}`, `.${styles.listLabel}`, `.${styles.row}`],
+          { opacity: 1, y: 0 });
+        gsap.set(`.${styles.rule}`, { scaleX: 1 });
+        /* One stable photograph, no cycle. */
+        gsap.set(layers[0], { opacity: 1 });
+        gsap.set(layers.slice(1), { opacity: 0 });
         return;
       }
 
-      /* ---------- the pinned campaign --------------------------------- */
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: 'top top',
-          /* Two and a half screens of campaign. The list block below is ~2vh
-             of real content that cannot be compressed without hurting the
-             prices' legibility, so this is what keeps the whole section inside
-             the 350-500vh the brief asked for. Each panel still gets roughly
-             two thirds of a screen to be held and looked at. */
-          end: () => `+=${window.innerHeight * 2.5}`,
-          pin: pin.current,
-          scrub: 0.9,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-        },
+      ScrollTrigger.create({
+        trigger: root.current,
+        start: 'top 78%',
+        once: true,
+        onEnter: show,
       });
 
-      /* 1. TRATTAMENTI. Letters rise out of their masks left to right while
-            the word compresses its tracking and comes forward. */
-      chars.forEach((ch, i) => {
-        tl.to(ch, { yPercent: 0, x: 0, z: 0, duration: 62, ease: 'power3.out' }, 4 + i * 4.5);
-      });
-      tl.to(`.${styles.eyebrow}`, { opacity: 1, y: 0, duration: 40, ease: 'power2.out' }, 0)
-        /* and the title yields the stage rather than simply vanishing */
-        .to(`.${styles.titleWrap}`, {
-          yPercent: -16, scale: 0.86, opacity: 0, duration: 70, ease: 'power2.inOut',
-        }, 128)
-        .to(`.${styles.rail}`, { opacity: 1, duration: 50, ease: 'power2.out' }, 170);
+      /* ---- the backdrop cycle ---------------------------------------
+         Stacked with ascending z-index, so a layer is revealed by the one
+         above it fading out and covered by the one above it fading in. That
+         is what makes 3 -> 1 a crossfade like every other handover instead of
+         a reset: layer 2 sits on top, layer 1 is hidden underneath it, and
+         fading layer 2 out uncovers layer 0 exactly where it started. */
+      const CYCLE = HOLD + FADE;
+      gsap.set(layers[0], { opacity: 1 });
+      gsap.set([layers[1], layers[2]], { opacity: 0 });
 
-      /* 2. The three panels, one at a time. Each rises into the stage behind
-            its own mask, holds while the photograph slowly settles, then
-            leaves upward as the next one arrives — the overlap is the
-            handover, and it is what reads as panels moving past. */
-      PANELS.forEach((_, i) => {
-        const h = HOLD[i];
-        tl.to(panels[i], { yPercent: 0, duration: 92, ease: 'power3.inOut' }, h.in)
-          .to(ins[i],    { yPercent: 0, duration: 92, ease: 'power3.inOut' }, h.in)
-          /* the campaign motion: slow, fashion-paced, never a Ken Burns sweep */
-          .to(imgs[i], {
-            scale: 1, yPercent: 1.4,
-            duration: h.to - h.from, ease: 'none',
-          }, h.from);
+      const cycle = gsap.timeline({ repeat: -1, paused: true });
+      cycle
+        .to(layers[1], { opacity: 1, duration: FADE, ease: 'power1.inOut' }, HOLD)
+        .to(layers[2], { opacity: 1, duration: FADE, ease: 'power1.inOut' }, HOLD + CYCLE)
+        /* hidden under the fully opaque layer 2, so this is invisible */
+        .set(layers[1], { opacity: 0 }, HOLD + CYCLE + FADE)
+        .to(layers[2], { opacity: 0, duration: FADE, ease: 'power1.inOut' }, HOLD + 2 * CYCLE);
 
-        if (i < PANELS.length - 1) {
-          tl.to(panels[i], { yPercent: -100, duration: 92, ease: 'power3.inOut' }, h.out - 30)
-            .to(ins[i],    { yPercent: 100,  duration: 92, ease: 'power3.inOut' }, h.out - 30);
-        }
-        if (i > 0) {
-          tl.to(counts[i - 1], { yPercent: -100, duration: 36, ease: 'power2.inOut' }, h.in + 30)
-            .to(counts[i],     { yPercent: 0,    duration: 36, ease: 'power2.inOut' }, h.in + 30);
-        }
+      /* Each photograph breathes only while it is the one being looked at,
+         and is reset while it is covered. */
+      imgs.forEach((img, i) => {
+        const from = i * CYCLE;
+        cycle.fromTo(img,
+          { scale: 1, xPercent: 0 },
+          { scale: 1.03, xPercent: i % 2 ? -0.8 : 0.8,
+            duration: CYCLE + FADE, ease: 'none' }, from)
+          .set(img, { scale: 1, xPercent: 0 }, from + CYCLE + FADE);
       });
 
-      /* the last panel and the rail hand the stage back before the pin ends */
-      tl.to(`.${styles.rail}`, { opacity: 0, duration: 44, ease: 'power2.in' }, 930)
-        .to(panels[2], { yPercent: -100, duration: 70, ease: 'power2.in' }, 940)
-        .to(ins[2],    { yPercent: 100,  duration: 70, ease: 'power2.in' }, 940);
+      /* Only run while the section is actually on screen. */
+      const io = new IntersectionObserver(
+        ([e]) => (e.isIntersecting ? cycle.play() : cycle.pause()),
+        { rootMargin: '10% 0px' },
+      );
+      io.observe(root.current!);
 
-      /* ---------- TUTTI I TRATTAMENTI, then the list ------------------- */
-      const listTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: listRoot.current,
-          start: 'top 88%',
-          end: 'bottom 78%',
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      gsap.set(`.${styles.listCh}`, { yPercent: 116, x: mobile ? 8 : 22 });
-      gsap.set(`.${styles.row}`, { opacity: 0, y: 22 });
-      gsap.set(`.${styles.rowLine}`, { scaleX: 0 });
-
-      gsap.utils.toArray<HTMLElement>(`.${styles.listCh}`).forEach((ch, i) => {
-        listTl.to(ch, { yPercent: 0, x: 0, duration: 40, ease: 'power3.out' }, 2 + i * 2.4);
-      });
-      listTl.to(`.${styles.row}`, {
-        opacity: 1, y: 0, duration: 26, ease: 'power2.out', stagger: 5.5,
-      }, 60)
-        .to(`.${styles.rowLine}`, {
-          scaleX: 1, duration: 30, ease: 'power2.out', stagger: 5.5,
-        }, 62);
+      return () => { io.disconnect(); cycle.kill(); };
     }, root);
 
     return () => { ctx.revert(); ScrollTrigger.refresh(); };
@@ -164,86 +108,66 @@ export default function SectionFour() {
 
   return (
     <section className={styles.four} ref={root} aria-label="Trattamenti">
-      <div className={styles.pin} ref={pin}>
-        <div className={styles.stage}>
-          {/* The poster. One panel at a time occupies it. */}
-          <div className={styles.poster}>
-            {PANELS.map((p, i) => (
-              <div className={styles.panel} key={p.src} style={{ zIndex: 10 + i }}>
-                <div className={styles.panelIn}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/ni/campaign/${p.src}.webp`}
-                    alt={p.alt}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    style={{ '--pos': p.pos, '--posM': p.posMobile } as React.CSSProperties}
-                  />
-                </div>
-              </div>
-            ))}
+      <div className={styles.bg} aria-hidden="true">
+        {PANELS.map((p, i) => (
+          <div className={styles.layer} key={p.src} style={{ zIndex: i + 1 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/ni/campaign/${p.src}.webp`}
+              alt=""
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              style={{ '--pos': p.pos, '--posM': p.posMobile } as React.CSSProperties}
+            />
           </div>
-
-          <div className={styles.titleWrap}>
-            <span className={styles.eyebrow}>02 — Campagna</span>
-            <h2 className={styles.title} aria-label={TITLE}>
-              {TITLE.split('').map((c, i) => (
-                <span className={styles.mask} key={i} aria-hidden="true">
-                  <span className={styles.ch}>{c}</span>
-                </span>
-              ))}
-            </h2>
-          </div>
-
-          {/* Two marks, no more: which panel you are on, and what this is. */}
-          <div className={styles.rail} aria-hidden="true">
-            <span className={styles.count}>
-              <span className={styles.countTrack}>
-                {PANELS.map((p, i) => (
-                  <span className={styles.countN} key={p.src}>
-                    0{i + 1}
-                  </span>
-                ))}
-              </span>
-              <span className={styles.countTotal}>/ 03</span>
-            </span>
-            <span className={styles.railLabel}>Campagna</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className={styles.listBlock} ref={listRoot}>
-        <h3 className={styles.listTitle} aria-label={LIST_TITLE.join(' ')}>
-          {LIST_TITLE.map((word, w) => (
-            <span className={styles.listLine} key={w}>
-              {word.split('').map((c, i) => (
-                <span className={styles.listMask} key={i} aria-hidden="true">
-                  <span className={styles.listCh}>{c === ' ' ? ' ' : c}</span>
-                </span>
-              ))}
-            </span>
-          ))}
-        </h3>
+      {/* Not one flat scrim. A vignette to seat the photograph in the page, a
+          bottom ramp to carry the list, and a left ramp to carry the title —
+          so the type is legible over all three photographs without any of them
+          being dimmed into monochrome. */}
+      <div className={styles.veil} aria-hidden="true" />
 
-        <ul className={styles.list}>
-          {SERVICES.map((s) => (
-            <li className={styles.row} key={s.name}>
-              <span className={styles.rowLine} aria-hidden="true" />
-              <span className={styles.rowName}>{s.name}</span>
-              <span className={styles.rowPrice}>
-                {s.note && <em className={styles.rowNote}>{s.note} </em>}
-                {s.price === 'info in salone' ? (
-                  <em className={styles.rowNote}>{s.price}</em>
-                ) : (
-                  <>
-                    <span className={styles.rowCur}>€</span>
-                    {s.price}
-                  </>
-                )}
+      <div className={styles.content}>
+        <header className={styles.head}>
+          <span className={styles.eyebrow}>03 — Campagna</span>
+          <h2 className={styles.title} aria-label={TITLE}>
+            {TITLE.split('').map((c, i) => (
+              <span className={styles.mask} key={i} aria-hidden="true">
+                <span className={styles.ch}>{c}</span>
               </span>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </h2>
+          <span className={styles.rule} aria-hidden="true" />
+        </header>
+
+        <div className={styles.listBlock}>
+          <h3 className={styles.listLabel}>{LIST_TITLE}</h3>
+          <div className={styles.cols}>
+            {COLUMNS.map((col, ci) => (
+              <ul className={styles.col} key={ci}>
+                {col.map((s) => (
+                  <li className={styles.row} key={s.name}>
+                    <span className={styles.name}>{s.name}</span>
+                    <span className={styles.dots} aria-hidden="true" />
+                    <span className={styles.price}>
+                      {s.note && <em className={styles.note}>{s.note} </em>}
+                      {s.price === 'info in salone' ? (
+                        <em className={styles.note}>{s.price}</em>
+                      ) : (
+                        <>
+                          <span className={styles.cur}>€</span>
+                          {s.price}
+                        </>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
