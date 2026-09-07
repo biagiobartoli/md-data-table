@@ -374,22 +374,28 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
   font-family:var(--ni-ui),system-ui,sans-serif; font-weight:400; font-size:9.5px;
   letter-spacing:.4em; text-transform:uppercase; color:#8FA9AB; will-change:transform,opacity;
 }
-.tCols{ display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(24px,3.4vw,58px) }
-.tCol{ margin:0; padding:0; list-style:none }
-/* A name, a leader, a price. The leader ties the two ends of the row together
-   at this size, and costs one gradient rather than fourteen border rules. */
-.tRow{ display:flex; align-items:baseline; gap:8px; padding:clamp(5px,.85vh,9px) 0;
-  will-change:transform,opacity }
+.tCols{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(5px,.7vh,8px) clamp(16px,2.2vw,34px) }
+.tCol{ margin:0; padding:0; list-style:none; display:grid; gap:clamp(5px,.7vh,8px) }
+/* Each treatment sits in its own panel. A hairline and a barely-there wash —
+   enough to lift the row off the photograph behind it, nowhere near enough to
+   read as a UI card. The border is the whole idea; the fill only stops the
+   photograph showing through the type. */
+.tRow{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding:clamp(5px,.8vh,9px) clamp(9px,1vw,14px);
+  border:1px solid rgba(190,200,204,.11);
+  background:linear-gradient(180deg, rgba(20,22,24,.34), rgba(9,10,11,.44));
+  will-change:transform,opacity;
+  transition:border-color .45s ease, background .45s ease,
+             box-shadow .45s ease, transform .45s cubic-bezier(.2,.7,.2,1);
+}
 .tName{
   flex:0 1 auto; font-family:var(--ni-display),"Times New Roman",serif; font-weight:300;
   font-size:clamp(.86rem,1.06vw,1.02rem); letter-spacing:.012em; color:#B4B9BD;
   white-space:nowrap; transition:color .4s ease;
 }
-.tDots{
-  flex:1 1 auto; min-width:14px; height:1px; transform:translateY(-.24em);
-  background:linear-gradient(90deg, rgba(169,173,178,.26), rgba(169,173,178,.1));
-  transition:background .4s ease;
-}
+/* The leader is gone: inside a panel the two edges already pair the name with
+   the price, and a rule between them was one line too many. */
 .tPrice{
   flex:0 0 auto; display:flex; align-items:baseline; gap:.28em;
   font-family:var(--ni-ui),system-ui,sans-serif; font-weight:300;
@@ -399,12 +405,29 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
 .tCur{ color:#6F9FA3; opacity:.85; transition:opacity .4s ease }
 .tNote{ font-family:var(--ni-italic),"Times New Roman",serif; font-style:italic;
   font-size:.94em; letter-spacing:.01em; color:#7D8287; transition:color .4s ease }
+/* Hover lights the panel rather than decorating it: the hairline brightens to
+   silver, the wash comes up a little, the type clears, and a single soft warm
+   bloom sits under it. The gold is in the light, not in the line — a gold
+   border next to the teal euro sign put two accents on one small object. */
 @media (hover:hover){
+  .tRow:hover{
+    border-color:rgba(214,220,223,.34);
+    background:linear-gradient(180deg, rgba(30,32,34,.5), rgba(14,15,16,.56));
+    box-shadow:0 8px 22px rgba(0,0,0,.42), 0 0 26px rgba(200,169,107,.09);
+    transform:translateY(-1px);
+  }
   .tRow:hover .tName{ color:#E6E9EB }
   .tRow:hover .tPrice{ color:#D2D6D9 }
   .tRow:hover .tNote{ color:#9BB4B5 }
   .tRow:hover .tCur{ opacity:1 }
-  .tRow:hover .tDots{ background:linear-gradient(90deg, rgba(111,159,163,.62), rgba(169,173,178,.14)) }
+}
+/* Touch: no hover to inherit, so the panel answers the tap itself and lets go
+   immediately. Nothing here depends on a pointer resting anywhere. */
+@media (hover:none){
+  .tRow:active{
+    border-color:rgba(214,220,223,.3);
+    background:linear-gradient(180deg, rgba(30,32,34,.5), rgba(14,15,16,.56));
+  }
 }
 /* Mobile: same composition, re-proportioned. The photograph fills the height
    and overflows horizontally here, so the framing switches to the X value. */
@@ -421,15 +444,11 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
   .tEyebrow,.tListLabel{ font-size:8.5px; letter-spacing:.3em }
   .tRule{ width:clamp(38px,12vw,64px) }
   .tListBlock{ width:100% }
-  .tCols{ gap:0 12px }
-  .tRow{ padding:clamp(3px,.55vh,6px) 0; gap:8px; justify-content:space-between }
+  .tCols{ gap:4px 8px }
+  .tCol{ gap:4px }
+  .tRow{ padding:clamp(3px,.5vh,6px) 8px; gap:8px }
   .tName{ font-size:clamp(.72rem,3.1vw,.86rem); letter-spacing:.004em }
   .tPrice{ font-size:clamp(.66rem,2.7vw,.78rem); letter-spacing:.03em; gap:.2em }
-  /* The leader goes. Two columns do fit here — measured, nothing clips at 375,
-     390 or 412 — but on the longest names the leader is squeezed to a 6px stub
-     that reads as a mistake. Space-between does the same job and looks
-     deliberate. */
-  .tDots{ display:none }
 }
 </style>
 </head>
@@ -1101,7 +1120,6 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
       col.forEach(function (s) {
         var li = document.createElement('li'); li.className = 'tRow';
         var name = document.createElement('span'); name.className = 'tName'; name.textContent = s[0];
-        var dots = document.createElement('span'); dots.className = 'tDots'; dots.setAttribute('aria-hidden','true');
         var price = document.createElement('span'); price.className = 'tPrice';
         if (s[2]) { var n = document.createElement('em'); n.className = 'tNote'; n.textContent = s[2] + ' '; price.appendChild(n); }
         if (s[1] === 'info in salone') {
@@ -1110,7 +1128,7 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
           var cur = document.createElement('span'); cur.className = 'tCur'; cur.textContent = '€';
           price.appendChild(cur); price.appendChild(document.createTextNode(s[1]));
         }
-        li.appendChild(name); li.appendChild(dots); li.appendChild(price); ul.appendChild(li);
+        li.appendChild(name); li.appendChild(price); ul.appendChild(li);
       });
       colsEl.appendChild(ul);
     });
@@ -1145,7 +1163,12 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
           .to('#tListLabel', { opacity: 1, y: 0, duration: 0.8 }, 0.95)
           /* The list arrives as one quiet block, not fourteen separate events —
              it is the section's footnote, not its headline. */
-          .to(rows, { opacity: 1, y: 0, duration: 0.7, stagger: 0.028 }, 1.1);
+          /* clearProps hands the transform back to CSS when the row lands.
+             GSAP leaves an inline translate behind, and an inline transform
+             beats the :hover rule — the panel's 1px lift silently did nothing
+             until this was added. */
+          .to(rows, { opacity: 1, y: 0, duration: 0.7, stagger: 0.028,
+                      clearProps: 'transform' }, 1.1);
       }
     });
 

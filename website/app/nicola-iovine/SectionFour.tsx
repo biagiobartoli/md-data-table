@@ -42,6 +42,11 @@ export default function SectionFour() {
              it is the section's footnote, not its headline. */
           .to(`.${styles.row}`, {
             opacity: 1, y: 0, duration: 0.7, stagger: 0.028,
+            /* Hand the transform back to CSS when the row lands. GSAP leaves
+               an inline translate behind, and an inline transform beats the
+               :hover rule — the panel's 1px lift silently did nothing until
+               this was added. */
+            clearProps: 'transform',
           }, 1.1);
         return tl;
       };
@@ -150,7 +155,6 @@ export default function SectionFour() {
                 {col.map((s) => (
                   <li className={styles.row} key={s.name}>
                     <span className={styles.name}>{s.name}</span>
-                    <span className={styles.dots} aria-hidden="true" />
                     <span className={styles.price}>
                       {s.note && <em className={styles.note}>{s.note} </em>}
                       {s.price === 'info in salone' ? (
