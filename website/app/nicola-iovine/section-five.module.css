@@ -6,27 +6,34 @@
 --------------------------------------------------------------------------- */
 .five{
   position:relative;
-  background:#070809;
+  background:#0A0705;   /* warm near-black, so the photograph's own edges blend */
   padding:clamp(86px,14vh,180px) clamp(20px,5vw,84px) clamp(96px,15vh,190px);
   overflow:hidden;
   isolation:isolate;
 }
 
-/* Atmosphere only — no photograph behind this one. SALONE already has the
-   flower, and a second image layer would make the two sections rhyme too
-   closely. A cool wash from above and a warm one low and right, which is where
-   the spread's colour sits. */
+/* ---------- the bench ---------- */
+.bg{ position:absolute; inset:0; z-index:0; overflow:hidden }
+.bg img{
+  display:block; width:100%; height:100%;
+  object-fit:cover; object-position:var(--bgPos);
+}
+
+/* Not one flat black sheet. A ramp from the top so the heading has ground to
+   sit on, a vignette to seat the frame, and a very light overall veil — enough
+   that the plates read as the brighter layer, nowhere near enough to take the
+   wood and the steel out of the photograph. */
 .atmos{
-  position:absolute; inset:0; z-index:0; pointer-events:none;
+  position:absolute; inset:0; z-index:1; pointer-events:none;
   background:
-    radial-gradient(90% 60% at 22% -6%, rgba(111,159,163,.09) 0%, rgba(7,8,9,0) 62%),
-    radial-gradient(80% 70% at 88% 88%, rgba(176,141,87,.055) 0%, rgba(7,8,9,0) 60%),
-    radial-gradient(130% 100% at 50% 40%, rgba(7,8,9,0) 40%, rgba(4,5,6,.75) 100%);
+    linear-gradient(180deg, rgba(8,6,5,.9) 0%, rgba(8,6,5,.6) 16%, rgba(8,6,5,.3) 34%, rgba(8,6,5,.28) 100%),
+    radial-gradient(120% 92% at 50% 40%, rgba(8,6,5,0) 34%, rgba(6,4,3,.72) 100%),
+    radial-gradient(70% 46% at 20% 4%, rgba(111,159,163,.05) 0%, rgba(8,6,5,0) 70%);
 }
 
 /* ---------- heading ---------- */
 .head{
-  position:relative; z-index:2;
+  position:relative; z-index:3;
   width:min(1320px,100%); margin:0 auto;
   padding-bottom:clamp(42px,6.5vh,92px);
 }
@@ -61,7 +68,7 @@
 
 /* ---------- the spread ---------- */
 .stage{
-  position:relative; z-index:1;
+  position:relative; z-index:2;
   width:min(1320px,100%); margin:0 auto;
   aspect-ratio:16/8.4;
   perspective:1500px; perspective-origin:50% 45%;
@@ -113,6 +120,14 @@
   .rule{ width:clamp(40px,13vw,70px); margin-top:clamp(14px,2vh,22px) }
   .kicker{ font-size:clamp(.86rem,3.7vw,1rem) }
   .stage{ aspect-ratio:5/11 }
+  .bg img{ object-position:var(--bgPosM) }
+  /* Weighted harder on a phone: the crop is far tighter there, so the
+     photograph is doing less work and the type needs more ground. */
+  .atmos{
+    background:
+      linear-gradient(180deg, rgba(8,6,5,.93) 0%, rgba(8,6,5,.68) 14%, rgba(8,6,5,.4) 30%, rgba(8,6,5,.38) 100%),
+      radial-gradient(130% 90% at 50% 38%, rgba(8,6,5,0) 30%, rgba(6,4,3,.72) 100%);
+  }
   .plate{ left:var(--mx); top:var(--my); width:var(--mw); aspect-ratio:var(--mratio) }
   .card img{ box-shadow:0 14px 32px rgba(0,0,0,.55), 0 0 0 1px rgba(190,200,204,.08) }
   .card.isOn{ transform:scale(1.045); transition:filter .6s ease, transform .6s cubic-bezier(.2,.7,.2,1) }

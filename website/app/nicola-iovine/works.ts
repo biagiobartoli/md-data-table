@@ -60,5 +60,17 @@ export const WORKS_MOBILE: Work[] = [
     x: 14, y: 72, w: 34, ratio: 2/3, rot: -3.6, depth: 0.58 },
 ];
 
+/* The barber's bench behind the whole section. Baked by
+   scripts/works-background.py — corner crop marks cut, graded down but kept
+   warm. Which axis is croppable flips with the viewport, as always: the frame
+   is 1.69 landscape and the section is portrait-ish, so on desktop the sides
+   go and only X matters; on a phone the crop is far tighter, so the value is
+   chosen to hold the scissors rather than the empty wood. */
+export const BACKGROUND = {
+  src: 'bench',
+  pos: '52% 46%',
+  posMobile: '58% 42%',
+};
+
 export const TITLE_LINES = ['I NOSTRI', 'LAVORI'];
 export const KICKER = 'Colore, styling e trasformazione';

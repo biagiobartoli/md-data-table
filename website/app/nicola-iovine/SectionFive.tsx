@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
-import { WORKS, WORKS_MOBILE, TITLE_LINES, KICKER } from './works';
+import { WORKS, WORKS_MOBILE, BACKGROUND, TITLE_LINES, KICKER } from './works';
 import styles from './section-five.module.css';
 
 /* Deliberately not SALONE's machinery. That section runs a cursor field over
@@ -140,6 +140,20 @@ export default function SectionFive() {
 
   return (
     <section className={styles.five} ref={root} aria-label="I nostri lavori">
+      {/* The craft, behind the results: the salon's own tools as the ground the
+          portfolio is laid on. Graded down in the bake so the scrim above it
+          can stay light — a heavy black layer would have cost the warm wood
+          and the metal, which is the whole reason the photograph is here. */}
+      <div className={styles.bg} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/ni/works/${BACKGROUND.src}.webp`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          style={{ '--bgPos': BACKGROUND.pos, '--bgPosM': BACKGROUND.posMobile } as React.CSSProperties}
+        />
+      </div>
       <div className={styles.atmos} aria-hidden="true" />
 
       <header className={styles.head}>
