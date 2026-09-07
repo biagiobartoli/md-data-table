@@ -1,0 +1,124 @@
+/* ---------------------------------------------------------------------------
+   Section five — I NOSTRI LAVORI.
+   A heading, then an editorial spread of the salon's work. Same family as
+   SALONE, different job: that one is a room and is nearly monochrome, this one
+   is results and keeps its colour.
+--------------------------------------------------------------------------- */
+.five{
+  position:relative;
+  background:#070809;
+  padding:clamp(86px,14vh,180px) clamp(20px,5vw,84px) clamp(96px,15vh,190px);
+  overflow:hidden;
+  isolation:isolate;
+}
+
+/* Atmosphere only — no photograph behind this one. SALONE already has the
+   flower, and a second image layer would make the two sections rhyme too
+   closely. A cool wash from above and a warm one low and right, which is where
+   the spread's colour sits. */
+.atmos{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(90% 60% at 22% -6%, rgba(111,159,163,.09) 0%, rgba(7,8,9,0) 62%),
+    radial-gradient(80% 70% at 88% 88%, rgba(176,141,87,.055) 0%, rgba(7,8,9,0) 60%),
+    radial-gradient(130% 100% at 50% 40%, rgba(7,8,9,0) 40%, rgba(4,5,6,.75) 100%);
+}
+
+/* ---------- heading ---------- */
+.head{
+  position:relative; z-index:2;
+  width:min(1320px,100%); margin:0 auto;
+  padding-bottom:clamp(42px,6.5vh,92px);
+}
+.title{
+  margin:0;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  font-size:clamp(2.6rem,8.6vw,7.6rem);
+  line-height:.94; letter-spacing:-.004em;
+  color:#DEE2E4;
+}
+.line{ display:flex; perspective:900px }
+/* The second line steps in. A flush-left two-liner reads as a paragraph; the
+   indent is what makes it read as a masthead. */
+.lineTwo{ padding-left:clamp(28px,7vw,148px) }
+.mask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.ch{ display:block; will-change:transform; white-space:pre }
+.rule{
+  display:block; margin:clamp(20px,2.8vh,34px) 0 0;
+  width:clamp(56px,7vw,124px); height:1px;
+  background:linear-gradient(90deg, rgba(111,159,163,.75), rgba(169,173,178,.18), transparent);
+  will-change:transform,opacity;
+}
+.kicker{
+  margin:clamp(12px,1.6vh,18px) 0 0;
+  font-family:var(--ni-italic),"Times New Roman",serif;
+  font-style:italic; font-weight:300;
+  font-size:clamp(.95rem,1.4vw,1.24rem);
+  letter-spacing:.012em; color:#8E9398;
+  will-change:transform,opacity;
+}
+
+/* ---------- the spread ---------- */
+.stage{
+  position:relative; z-index:1;
+  width:min(1320px,100%); margin:0 auto;
+  aspect-ratio:16/8.4;
+  perspective:1500px; perspective-origin:50% 45%;
+}
+/* .plate is layout only and never transformed, so nothing here depends on
+   measuring a moving box. */
+.plate{
+  position:absolute; margin:0;
+  left:var(--x); top:var(--y); width:var(--w);
+  aspect-ratio:var(--ratio);
+}
+.entry{ width:100%; height:100%; will-change:transform,opacity }
+
+.card{
+  display:block; width:100%; height:100%; padding:0; border:0;
+  background:none; cursor:pointer; appearance:none;
+  transform-style:preserve-3d; will-change:transform;
+  /* Softened, not drained. This section is about colour work, so the resting
+     state keeps most of it — a long way from SALONE's saturate(.28). */
+  filter:saturate(.72) brightness(.82) contrast(.99);
+  transition:filter .6s ease;
+}
+.card img{
+  display:block; width:100%; height:100%; object-fit:cover;
+  box-shadow:0 22px 52px rgba(0,0,0,.55), 0 0 0 1px rgba(190,200,204,.08);
+}
+.card.isOn{ filter:none }
+.card.isOff{ filter:saturate(.4) brightness(.58) contrast(.97) }
+.card:focus-visible{ outline:1px solid rgba(183,200,200,.8); outline-offset:8px }
+
+/* The caption belongs to the plate and arrives with it. */
+.label{
+  position:absolute; left:0; top:calc(100% + 10px);
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:8.5px; letter-spacing:.36em; text-transform:uppercase;
+  color:#8FA9AB; white-space:nowrap;
+  opacity:0; transform:translateY(-4px);
+  transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.card.isOn .label{ opacity:1; transform:translateY(0) }
+
+/* ---------- mobile ----------
+   A separate arrangement: two staggered columns, no overlaps. */
+@media (max-width:860px){
+  .five{ padding:clamp(64px,9vh,104px) 20px clamp(72px,11vh,120px) }
+  .head{ padding-bottom:clamp(28px,4vh,44px) }
+  .title{ font-size:clamp(2rem,12.4vw,3.6rem) }
+  .lineTwo{ padding-left:clamp(16px,9vw,44px) }
+  .rule{ width:clamp(40px,13vw,70px); margin-top:clamp(14px,2vh,22px) }
+  .kicker{ font-size:clamp(.86rem,3.7vw,1rem) }
+  .stage{ aspect-ratio:5/11 }
+  .plate{ left:var(--mx); top:var(--my); width:var(--mw); aspect-ratio:var(--mratio) }
+  .card img{ box-shadow:0 14px 32px rgba(0,0,0,.55), 0 0 0 1px rgba(190,200,204,.08) }
+  .card.isOn{ transform:scale(1.045); transition:filter .6s ease, transform .6s cubic-bezier(.2,.7,.2,1) }
+  .label{ font-size:8px; letter-spacing:.28em; top:calc(100% + 7px) }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .card,.label{ transition:none }
+}

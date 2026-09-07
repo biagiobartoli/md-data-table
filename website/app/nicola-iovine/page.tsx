@@ -3,6 +3,7 @@ import { Cormorant, Cormorant_Garamond, Montserrat } from 'next/font/google';
 import Scene from './Scene';
 import SectionThree from './SectionThree';
 import SectionFour from './SectionFour';
+import SectionFive from './SectionFive';
 import styles from './hero.module.css';
 
 const display = Cormorant({
@@ -29,6 +30,7 @@ export default function Page() {
       <Scene />
       <SectionThree />
       <SectionFour />
+      <SectionFive />
     </div>
   );
 }
