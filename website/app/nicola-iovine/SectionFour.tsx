@@ -3,7 +3,8 @@
 import { useRef } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
-import { PANELS, COLUMNS, TITLE, LIST_TITLE } from './treatments';
+import { MoveRight } from 'lucide-react';
+import { PANELS, COLUMNS, SERVICES, ROW_MEDIA, TITLE, LIST_TITLE } from './treatments';
 import styles from './section-four.module.css';
 
 /* One composition, one screen. The photographs are a backdrop that changes on
@@ -152,8 +153,25 @@ export default function SectionFour() {
           <div className={styles.cols}>
             {COLUMNS.map((col, ci) => (
               <ul className={styles.col} key={ci}>
-                {col.map((s) => (
+                {col.map((s) => {
+                  const media = ROW_MEDIA[SERVICES.indexOf(s)];
+                  return (
                   <li className={styles.row} key={s.name}>
+                    {/* The cinematic reveal, kept inside the panel's own bounds:
+                        the photograph fades up behind the type and un-zooms,
+                        under a gradient that holds the left edge dark enough to
+                        read. No height change, so nothing below it reflows. */}
+                    <span className={styles.rowMedia} aria-hidden="true">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/ni/campaign/${media.src}.webp`}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        style={{ objectPosition: media.pos }}
+                      />
+                      <span className={styles.rowVeil} />
+                    </span>
                     <span className={styles.name}>{s.name}</span>
                     <span className={styles.price}>
                       {s.note && <em className={styles.note}>{s.note} </em>}
@@ -166,8 +184,12 @@ export default function SectionFour() {
                         </>
                       )}
                     </span>
+                    <span className={styles.arrow} aria-hidden="true">
+                      <MoveRight />
+                    </span>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ))}
           </div>

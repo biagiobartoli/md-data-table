@@ -64,3 +64,12 @@ export const LIST_TITLE = 'Tutti i trattamenti';
 
 /* Split for the two columns. Seven and seven, in the order given. */
 export const COLUMNS = [SERVICES.slice(0, 7), SERVICES.slice(7)];
+
+/* Which campaign photograph each row reveals on hover, and which band of it.
+   Fourteen rows over three photographs, so they cycle; the band walks down the
+   frame as the list goes so two neighbouring rows never show the same crop.
+   Each row is a wide, shallow letterbox, which is why only the Y matters. */
+export const ROW_MEDIA = SERVICES.map((_, i) => ({
+  src: PANELS[i % PANELS.length].src,
+  pos: `50% ${12 + ((i * 13) % 62)}%`,
+}));

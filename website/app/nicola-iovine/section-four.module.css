@@ -94,6 +94,7 @@
    read as a UI card. The border is the whole idea; the fill only stops the
    photograph showing through the type. */
 .row{
+  position:relative; overflow:hidden;
   display:flex; align-items:baseline; justify-content:space-between; gap:10px;
   padding:clamp(5px,.8vh,9px) clamp(9px,1vw,14px);
   border:1px solid rgba(190,200,204,.11);
@@ -102,12 +103,47 @@
   transition:border-color .45s ease, background .45s ease,
              box-shadow .45s ease, transform .45s cubic-bezier(.2,.7,.2,1);
 }
+/* --- the reveal ---------------------------------------------------------
+   Adapted from components/ui/cinematic-list: the same idea — a photograph
+   fading up behind the row, un-zooming, under a gradient — but held inside the
+   panel instead of expanding it. The list has to stay one screen, so the row
+   cannot grow to 400px; a wide shallow letterbox of the campaign frame does
+   the same work without moving anything below it. */
+.rowMedia{
+  position:absolute; inset:0; z-index:0;
+  opacity:0; transition:opacity .65s ease;
+}
+.rowMedia img{
+  display:block; width:100%; height:100%; object-fit:cover;
+  transform:scale(1.16);
+  transition:transform 1.1s cubic-bezier(.25,1,.5,1);
+}
+/* Left-to-right rather than the original's bottom-up: this panel is far wider
+   than it is tall, and the type it has to protect runs along the left. */
+.rowVeil{
+  position:absolute; inset:0;
+  background:linear-gradient(90deg, rgba(5,5,5,.93) 0%, rgba(5,5,5,.72) 40%,
+                             rgba(5,5,5,.42) 76%, rgba(5,5,5,.3) 100%);
+}
+.name,.price,.arrow{ position:relative; z-index:1 }
+
+/* The icon circle, at this list's scale. */
+.arrow{
+  flex:0 0 auto; display:none; align-items:center; justify-content:center;
+  width:19px; height:19px; margin-left:2px;
+  border:1px solid rgba(190,200,204,.22); border-radius:999px;
+  color:#8A8F94; opacity:0; transform:translateX(-5px);
+  transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1),
+             border-color .5s ease, background-color .5s ease, color .5s ease;
+}
+.arrow svg{ width:11px; height:11px; transition:transform .5s ease }
+
 .name{
   flex:0 1 auto;
   font-family:var(--ni-display),"Times New Roman",serif;
   font-weight:300; font-size:clamp(.86rem,1.06vw,1.02rem);
   letter-spacing:.012em; color:#B4B9BD; white-space:nowrap;
-  transition:color .4s ease;
+  transition:color .4s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
 /* The leader is gone: inside a panel the two edges already pair the name with
    the price, and a rule between them was one line too many. */
@@ -129,6 +165,17 @@
    bloom sits under it. The gold is in the light, not in the line — a gold
    border next to the teal euro sign put two accents on one small object. */
 @media (hover:hover){
+  /* The slot is only reserved where hover exists, so the narrow mobile columns
+     keep every pixel for the name. */
+  .arrow{ display:flex }
+  .row:hover .rowMedia{ opacity:1 }
+  .row:hover .rowMedia img{ transform:scale(1) }
+  .row:hover .name{ transform:translateX(3px) }
+  .row:hover .arrow{
+    opacity:1; transform:translateX(0);
+    border-color:rgba(232,236,238,.9); background-color:rgba(232,236,238,.92); color:#0A0B0C;
+  }
+  .row:hover .arrow svg{ transform:rotate(-45deg) }
   .row:hover{
     border-color:rgba(214,220,223,.34);
     background:linear-gradient(180deg, rgba(30,32,34,.5), rgba(14,15,16,.56));
