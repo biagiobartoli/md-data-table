@@ -25,7 +25,10 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
 
     const start = () => {
       if (lenis) return;
-      lenis = new Lenis({ duration: 1.2, smoothWheel: true });
+      /* `anchors` lets Lenis intercept same-page links and glide to them, so the
+         nav and the footer scroll with the page's own easing instead of
+         jumping. Without it the browser jumps and Lenis then fights the jump. */
+      lenis = new Lenis({ duration: 1.2, smoothWheel: true, anchors: true });
       lenis.on('scroll', ScrollTrigger.update);
 
       // GSAP ticker time is seconds; Lenis expects milliseconds.

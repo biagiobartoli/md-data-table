@@ -341,7 +341,7 @@ export default function SectionThree() {
   };
 
   return (
-    <section className={styles.three} ref={root} aria-label="Salone — galleria">
+    <section className={styles.three} id="salone" ref={root} aria-label="Salone — galleria">
       {/* Atmosphere. Screen-blended so the photograph's own black ground
           disappears into the section instead of sitting on it as a rectangle —
           only the flower adds light. Oversized and pushed off the left edge so

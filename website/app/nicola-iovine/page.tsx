@@ -4,6 +4,7 @@ import Scene from './Scene';
 import SectionThree from './SectionThree';
 import SectionFour from './SectionFour';
 import SectionFive from './SectionFive';
+import SectionSix from './SectionSix';
 import styles from './hero.module.css';
 
 const display = Cormorant({
@@ -31,6 +32,7 @@ export default function Page() {
       <SectionThree />
       <SectionFour />
       <SectionFive />
+      <SectionSix />
     </div>
   );
 }

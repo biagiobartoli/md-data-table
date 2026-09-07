@@ -139,7 +139,7 @@ export default function SectionFive() {
   };
 
   return (
-    <section className={styles.five} ref={root} aria-label="I nostri lavori">
+    <section className={styles.five} id="lavori" ref={root} aria-label="I nostri lavori">
       {/* The craft, behind the results: the salon's own tools as the ground the
           portfolio is laid on. Graded down in the bake so the scrim above it
           can stay light — a heavy black layer would have cost the warm wood

@@ -114,11 +114,14 @@ export default function Hero() {
       <nav className={styles.nav}>
         <a className={styles.mark} href="#" aria-label="Nicola Iovine">NI</a>
         <div className={styles.navEnd}>
+          {/* Wired to the sections that now exist. The labels are untouched —
+              renaming Servizi and Gallery to match the section headings would
+              change the nav's appearance, which was explicitly out of scope. */}
           <ul className={styles.links}>
-            <li><a href="#">Salone</a></li>
-            <li><a href="#">Servizi</a></li>
-            <li><a href="#">Gallery</a></li>
-            <li><a href="#">Contatti</a></li>
+            <li><a href="#salone">Salone</a></li>
+            <li><a href="#trattamenti">Servizi</a></li>
+            <li><a href="#lavori">Gallery</a></li>
+            <li><a href="#contatti">Contatti</a></li>
           </ul>
           {/* Contact, not booking: this opens a WhatsApp chat with the salon.
               The number lives in ./contact.ts and nowhere else. */}

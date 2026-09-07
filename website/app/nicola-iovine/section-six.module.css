@@ -1,0 +1,291 @@
+/* ---------------------------------------------------------------------------
+   Section six — contatti, recensioni, footer.
+   The closing section, so it is the calmest: no photograph, no texture, just
+   ground and type. The only warmth on the page is the gold around the booking
+   CTA, which is where it should be.
+--------------------------------------------------------------------------- */
+.six{
+  position:relative;
+  background:#050505;
+  color:#A9ADB2;
+  padding:clamp(90px,14vh,180px) clamp(20px,5vw,84px) clamp(28px,4vh,44px);
+  overflow:hidden;
+  isolation:isolate;
+}
+.atmos{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    /* a warm bloom under the CTA, and only there */
+    radial-gradient(46% 34% at 20% 46%, rgba(176,141,87,.075) 0%, rgba(5,5,5,0) 70%),
+    radial-gradient(70% 46% at 82% 6%, rgba(111,159,163,.055) 0%, rgba(5,5,5,0) 68%),
+    radial-gradient(130% 96% at 50% 44%, rgba(5,5,5,0) 42%, rgba(3,3,3,.8) 100%);
+}
+/* The town, once, very quietly, behind the footer. It is the third thing the
+   site says after the name and the invitation. */
+.place{
+  position:absolute; left:50%; bottom:-2.5vw; translate:-50% 0; z-index:0;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:20vw; line-height:.8; letter-spacing:.06em;
+  color:#fff; opacity:.022; white-space:nowrap; pointer-events:none;
+}
+.inner{ position:relative; z-index:1; width:min(1320px,100%); margin:0 auto }
+
+/* Everything that arrives after the title carries this. It has to exist as a
+   rule and not only as a JSX string: CSS Modules only export classes the
+   stylesheet actually declares, so `styles.reveal` was undefined and the whole
+   staggered entrance — CTAs, details, rating, reviews — silently animated
+   nothing while the elements sat visible from the first frame. */
+.reveal{ will-change:transform,opacity }
+
+/* ---------- the composition ---------- */
+.top{
+  display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+  gap:clamp(40px,6vw,110px);
+  /* Centred, not top-aligned. The details column is the taller of the two, and
+     aligning both to the top left a quarter-screen void under the CTAs; this
+     splits that space above and below the ask so it reads as air. */
+  align-items:center;
+}
+/* The grid's `minmax(0,...)` needs a matching min-width:0 here, or a long
+   unbroken line in the title can push the column past its track. Also the
+   second class the audit caught missing: `styles.ask` was undefined, which
+   renders as className="undefined" — harmless today, a trap tomorrow. */
+.ask{ min-width:0 }
+
+.eyebrow{
+  display:block; margin-bottom:clamp(14px,2vh,24px);
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase; color:#8FA9AB;
+}
+.title{
+  margin:0;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  font-size:clamp(2.1rem,4.9vw,4.5rem);
+  line-height:1.0; letter-spacing:-.004em; color:#DEE2E4;
+}
+.line{ display:flex }
+.mask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.ch{ display:block; will-change:transform; white-space:pre }
+
+/* ---------- actions ---------- */
+.actions{
+  display:flex; flex-wrap:wrap; align-items:center;
+  gap:clamp(14px,1.6vw,26px);
+  margin-top:clamp(30px,4.4vh,54px);
+}
+/* The same gold language as the nav's PRENOTA, at the scale of a closing
+   action rather than a chip. */
+.cta{
+  position:relative; overflow:hidden;
+  display:inline-block; white-space:nowrap;
+  padding:15px 30px 14px;
+  border:1px solid rgba(176,141,87,.44);
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:10px; letter-spacing:.34em; text-transform:uppercase; font-weight:500;
+  color:#C6A470; text-decoration:none;
+  background-color:rgba(176,141,87,0);
+  transition:color .5s ease, border-color .5s ease,
+             background-color .5s ease, box-shadow .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+}
+/* A light that travels the edge, not a fill that floods it. */
+.ctaSheen{
+  position:absolute; top:0; bottom:0; left:-60%; width:45%;
+  background:linear-gradient(100deg, rgba(232,206,160,0) 0%, rgba(232,206,160,.16) 50%, rgba(232,206,160,0) 100%);
+  transform:skewX(-14deg); pointer-events:none;
+  transition:transform .95s cubic-bezier(.3,.8,.3,1);
+}
+.ghost{
+  display:inline-flex; align-items:baseline; gap:.5em;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.3em; text-transform:uppercase; font-weight:400;
+  color:#8F9499; text-decoration:none;
+  padding-bottom:4px; border-bottom:1px solid rgba(169,173,178,.16);
+  transition:color .45s ease, border-color .45s ease;
+}
+.arrow{ display:inline-block; transition:transform .45s cubic-bezier(.2,.7,.2,1) }
+
+/* ---------- details ---------- */
+.details{ display:flex; flex-direction:column; gap:clamp(24px,3.4vh,40px); padding-top:clamp(4px,1.4vh,18px) }
+.legal{
+  margin:0 0 10px;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:#6E7175;
+}
+.address{
+  display:block; margin-bottom:10px;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:clamp(1.14rem,1.7vw,1.44rem); line-height:1.5;
+  color:#BFC4C8; text-decoration:none;
+  background-image:linear-gradient(90deg, rgba(111,159,163,.7), rgba(111,159,163,.7));
+  background-repeat:no-repeat; background-position:0 100%; background-size:0 1px;
+  transition:color .45s ease, background-size .55s cubic-bezier(.2,.7,.2,1);
+}
+.phone{
+  display:inline-block;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:11px; letter-spacing:.22em; color:#8F9499; text-decoration:none;
+  transition:color .45s ease;
+}
+
+.rating{ display:flex; align-items:baseline; gap:.6em; flex-wrap:wrap }
+.score{
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:clamp(2rem,2.9vw,2.6rem); line-height:1; color:#DEE2E4;
+}
+.scoreOf{ font-family:var(--ni-ui),system-ui,sans-serif; font-size:10px; letter-spacing:.2em; color:#6E7175 }
+/* Our stars, not Google's: silver, small, and set in the site's own tracking. */
+.ratingStars{ font-size:12px; letter-spacing:.24em; color:#B08D57; opacity:.82 }
+.count{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:#6E7175;
+}
+
+/* Seven rows, not seven cards. */
+.hours{ margin:0; padding:0; display:grid; gap:2px; max-width:340px }
+.hourRow{
+  display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  padding:6px 0; border-bottom:1px solid rgba(169,173,178,.075);
+}
+.hourRow:last-child{ border-bottom:0 }
+.day{
+  margin:0; font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:.95rem; color:#9EA3A8;
+}
+.time{
+  margin:0; font-family:var(--ni-ui),system-ui,sans-serif;
+  font-weight:300; font-size:.78rem; letter-spacing:.06em; color:#8A8F94;
+}
+.closed{
+  font-family:var(--ni-italic),"Times New Roman",serif;
+  font-style:italic; font-size:.86rem; letter-spacing:.01em; color:#65686C;
+}
+
+/* ---------- reviews ---------- */
+.reviews{ margin-top:clamp(56px,8vh,110px) }
+.reviewsTitle{
+  margin:0 0 clamp(18px,2.6vh,30px);
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-weight:400; font-size:9.5px; letter-spacing:.4em; text-transform:uppercase; color:#8FA9AB;
+}
+/* Masked at both edges so cards arrive and leave rather than appearing at a
+   hard boundary. The track overflows inside here and nowhere else. */
+.viewport{
+  position:relative; overflow:hidden; cursor:grab;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  touch-action:pan-y;   /* horizontal drags belong to the ticker, vertical to the page */
+}
+.isDragging{ cursor:grabbing }
+.track{ display:flex; gap:clamp(16px,1.8vw,28px); width:max-content; will-change:transform }
+
+.card{
+  flex:0 0 auto; width:clamp(268px,26vw,392px); margin:0;
+  display:flex; flex-direction:column; gap:12px;
+  padding:clamp(20px,2vw,28px);
+  border:1px solid rgba(190,200,204,.1);
+  background:linear-gradient(180deg, rgba(22,24,26,.5), rgba(9,10,11,.6));
+  transition:border-color .45s ease, background .45s ease,
+             box-shadow .45s ease, transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.stars{ font-size:10px; letter-spacing:.24em; color:#B08D57; opacity:.8 }
+.quote{
+  margin:0; font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:clamp(.94rem,1.1vw,1.06rem); line-height:1.62; color:#B4B9BD;
+}
+.who{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:8.5px; letter-spacing:.32em; text-transform:uppercase; color:#7C9092;
+}
+
+/* ---------- footer ---------- */
+.footer{
+  margin-top:clamp(56px,8vh,110px);
+  padding-top:clamp(24px,3.4vh,40px);
+  border-top:1px solid rgba(169,173,178,.1);
+  display:grid; grid-template-columns:auto auto 1fr auto;
+  gap:clamp(20px,3vw,56px); align-items:start;
+}
+.footBrand{ display:flex; flex-direction:column; gap:4px }
+.footName{
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300; font-size:1.05rem; letter-spacing:.14em; text-transform:uppercase; color:#C3C7CA;
+}
+.footRole{
+  font-family:var(--ni-italic),"Times New Roman",serif;
+  font-style:italic; font-size:.86rem; letter-spacing:.06em; color:#7C8085;
+}
+.footCol{ display:flex; flex-direction:column; gap:3px }
+.footLine,.footLink,.footTiny,.footNav a{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9px; letter-spacing:.22em; color:#6E7175; text-decoration:none;
+}
+.footLink,.footNav a{ transition:color .4s ease }
+.footNav{ display:flex; flex-wrap:wrap; gap:clamp(12px,1.6vw,26px); justify-self:center }
+.footNav a{ text-transform:uppercase; letter-spacing:.28em }
+.footLegal{ display:flex; align-items:center; gap:clamp(12px,1.4vw,22px); justify-self:end }
+.footTiny{ text-transform:uppercase; letter-spacing:.24em; font-size:8px }
+a.footTiny{ transition:color .4s ease }
+
+/* ---------- hover, pointer devices only ---------- */
+@media (hover:hover){
+  .cta:hover{
+    color:#E2C68E; border-color:rgba(214,183,127,.72);
+    background-color:rgba(176,141,87,.07);
+    box-shadow:0 0 30px rgba(176,141,87,.13), inset 0 0 16px rgba(176,141,87,.05);
+    transform:translateY(-1px);
+  }
+  .cta:hover .ctaSheen{ transform:skewX(-14deg) translateX(340%) }
+  .ghost:hover{ color:#D2D6D9; border-color:rgba(111,159,163,.5) }
+  .ghost:hover .arrow{ transform:translateX(4px) }
+  .address:hover{ color:#E2E5E7; background-size:100% 1px }
+  .phone:hover{ color:#C6A470 }
+  .card:hover{
+    border-color:rgba(214,220,223,.3);
+    background:linear-gradient(180deg, rgba(32,34,36,.6), rgba(14,15,16,.66));
+    box-shadow:0 10px 26px rgba(0,0,0,.44), 0 0 28px rgba(200,169,107,.07);
+    transform:translateY(-3px);
+  }
+  .footLink:hover,.footNav a:hover,a.footTiny:hover{ color:#B4B9BD }
+}
+.cta:focus-visible,.ghost:focus-visible,.address:focus-visible,
+.phone:focus-visible,.footNav a:focus-visible{
+  outline:1px solid rgba(183,200,200,.8); outline-offset:6px;
+}
+
+/* ---------- mobile ---------- */
+@media (max-width:860px){
+  .six{ padding:clamp(64px,9vh,96px) 20px clamp(22px,3vh,32px) }
+  .place{ font-size:30vw; bottom:-4vw; opacity:.026 }
+  /* One column, in the order the brief asks for: ask, then details, then
+     reviews, then footer. */
+  .top{ grid-template-columns:1fr; gap:clamp(30px,5vh,44px) }
+  .title{ font-size:clamp(1.72rem,8.4vw,2.6rem) }
+  .actions{ margin-top:clamp(22px,3.4vh,32px); gap:16px }
+  .cta{ padding:14px 24px 13px; font-size:9.5px; letter-spacing:.3em; width:100%; text-align:center }
+  .ghost{ font-size:9px; letter-spacing:.26em }
+  .details{ gap:clamp(20px,3vh,30px); padding-top:0 }
+  .hours{ max-width:none }
+  .day{ font-size:.9rem }
+  .time{ font-size:.74rem }
+  .reviews{ margin-top:clamp(40px,6vh,64px) }
+  /* Full-bleed track on a phone: the card should run to the edge and out of
+     it, which is what tells you there is more to the side. */
+  .viewport{ margin:0 -20px; padding:0 20px }
+  .card{ width:min(78vw,300px); padding:18px }
+  .footer{
+    margin-top:clamp(40px,6vh,64px);
+    grid-template-columns:1fr; gap:20px; justify-items:start;
+  }
+  .footNav,.footLegal{ justify-self:start }
+  .footNav{ gap:14px }
+  .footLegal{ gap:14px; flex-wrap:wrap }
+}
+
+@media (prefers-reduced-motion:reduce){
+  /* No ticker, so the row becomes an ordinary scrollable one and the mask
+     would only hide where it starts and ends. */
+  .viewport{ overflow-x:auto; cursor:default; -webkit-mask-image:none; mask-image:none }
+  .cta,.ghost,.card,.address,.arrow,.ctaSheen{ transition:none }
+  .ctaSheen{ display:none }
+}

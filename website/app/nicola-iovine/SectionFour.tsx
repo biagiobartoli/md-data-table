@@ -113,7 +113,7 @@ export default function SectionFour() {
   }, []);
 
   return (
-    <section className={styles.four} ref={root} aria-label="Trattamenti">
+    <section className={styles.four} id="trattamenti" ref={root} aria-label="Trattamenti">
       <div className={styles.bg} aria-hidden="true">
         {PANELS.map((p, i) => (
           <div className={styles.layer} key={p.src} style={{ zIndex: i + 1 }}>
