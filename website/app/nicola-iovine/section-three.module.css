@@ -8,8 +8,44 @@
   position:relative;
   background:radial-gradient(120% 80% at 50% 0%, #101315 0%, #0A0C0D 46%, #08090A 100%);
   padding:clamp(84px,14vh,180px) clamp(16px,3.2vw,64px) clamp(96px,16vh,200px);
-  overflow:hidden;      /* plates fly in from off-stage */
+  overflow:hidden;      /* plates fly in from off-stage; the flower is a crop */
   isolation:isolate;
+}
+
+/* ---------- flower: atmosphere, not subject ---------- */
+/* Screen blending is what keeps this from reading as a pasted rectangle: the
+   source photograph sits on a true black ground (measured p50 luminance
+   0.004), so screen drops that ground to nothing and only the petals add
+   light. Oversized and hung off the left edge, cropped by the section. */
+.flower{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  overflow:hidden;
+}
+.flower img{
+  position:absolute; right:-10%; top:50%;
+  width:auto; height:100%;
+  transform:translateY(-50%);
+  mix-blend-mode:screen;
+  opacity:.34;
+  /* Hung off the right, where the heading is not: SALONE is left-aligned, and
+     a flower behind it would fight the one thing the section is named for.
+     The right offset is what lands the photograph's own subject (which sits in
+     the left half of its frame) into the section's right-hand space.
+
+     Only a vertical mask. A horizontal one is what you reach for first, and it
+     was wrong here: the flower is at the image's left edge, so any left-right
+     fade either erases the bloom or keeps the empty half of the frame. The
+     photograph's own black ground already does that job under `screen`. */
+  -webkit-mask-image:linear-gradient(180deg, transparent 0%, #000 13%, #000 82%, transparent 100%);
+  mask-image:linear-gradient(180deg, transparent 0%, #000 13%, #000 82%, transparent 100%);
+  will-change:transform;
+}
+
+/* ---------- heading ---------- */
+.head{
+  position:relative; z-index:2;
+  width:min(1320px,100%); margin:0 auto;
+  padding-bottom:clamp(38px,6vh,86px);
 }
 
 /* The stage carries the coordinate system the composition is authored in.
@@ -17,13 +53,12 @@
    keep its relationship to the others at any width. */
 .stage{
   position:relative;
-  /* The 118svh term is what keeps the whole composition on one screen: the
-     stage is 16:11, so capping its width by viewport height caps its height
-     too. Without it the bottom plates sit below the fold and the arrangement
-     never reads as a single spread. */
-  width:min(1320px,100%,118svh);
+  width:min(1320px,100%);
   margin:0 auto;
-  aspect-ratio:16/11;
+  /* Wide and shallow. With the heading lifted out of it the composition has no
+     centre band to keep clear, so it spreads sideways instead of stacking, and
+     the whole spread still lands under the title on one screen. */
+  aspect-ratio:16/8.5;
   perspective:1400px;
   perspective-origin:50% 45%;
   z-index:1;
@@ -34,22 +69,31 @@
 
 /* ---------- SALONE ---------- */
 .title{
-  position:absolute; inset:0; margin:0;
-  display:flex; align-items:center; justify-content:center;
-  z-index:0; pointer-events:none;
-  transform-style:preserve-3d;
+  margin:0; display:flex; justify-content:flex-start;
+  perspective:900px;
   font-family:var(--ni-display),"Times New Roman",serif;
   font-weight:300;
-  /* Deliberately larger than the stage can politely hold: the word is a layer,
-     not a heading, and it is meant to run past the plates. */
-  font-size:clamp(4.5rem,19vw,17rem);
-  line-height:.82; letter-spacing:0;
+  font-size:clamp(3.6rem,13vw,11.5rem);
+  line-height:.9; letter-spacing:0;
   color:#C8CCCF;
   white-space:nowrap;
 }
+/* Each letter gets its own overflow box to rise out of. The padding/negative
+   margin pair is there so the mask does not clip the descender-free caps'
+   optical overshoot at large sizes. */
+.mask{
+  display:block; overflow:hidden;
+  padding-bottom:.1em; margin-bottom:-.1em;
+}
 .ch{
-  display:inline-block; will-change:transform,opacity;
+  display:block; will-change:transform;
   transform-style:preserve-3d;
+}
+.rule{
+  display:block; margin-top:clamp(18px,2.6vh,34px);
+  width:clamp(64px,9vw,148px); height:1px;
+  background:linear-gradient(90deg, rgba(111,159,163,.7), rgba(169,173,178,.16), transparent);
+  transform:scaleX(0); transform-origin:left center; will-change:transform;
 }
 
 /* ---------- plates ---------- */
@@ -109,9 +153,14 @@
 /* A separate arrangement, not a reflow: an irregular overlapping composition
    cannot be squeezed into a narrow column without becoming a pile. */
 @media (max-width:860px){
-  .stage{ aspect-ratio:5/12 }
+  .stage{ aspect-ratio:5/11 }
+  .head{ padding-bottom:clamp(26px,4vh,44px) }
+  .title{ font-size:clamp(2.9rem,17vw,5rem) }
+  .rule{ width:clamp(44px,16vw,78px) }
+  /* Weaker and pushed further out: on a phone the flower has the whole width
+     to itself and would otherwise read as the subject. */
+  .flower img{ right:-34%; height:52%; opacity:.26 }
   .plate{ left:var(--mx); top:var(--my); width:var(--mw); aspect-ratio:var(--mratio) }
-  .title{ font-size:clamp(3.2rem,22vw,7rem) }
   .card img{ box-shadow:0 12px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(190,200,204,.07) }
   /* No cursor here, so nothing is ever "receded by proximity" — only the
      tapped plate lifts and the rest soften, a touch further than on desktop. */

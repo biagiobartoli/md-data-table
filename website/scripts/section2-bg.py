@@ -20,7 +20,10 @@ from PIL import Image
 ap = argparse.ArgumentParser()
 ap.add_argument('source'); ap.add_argument('--out', default='public/ni')
 ap.add_argument('--name', default='section-2-bg', help='output stem, no extension')
-ap.add_argument('--contrast', type=float, default=0.72, help='<1 flattens')
+ap.add_argument('--contrast', type=float, default=0.72, help='<1 flattens, pivots at mid grey')
+ap.add_argument('--gamma', type=float, default=1.0,
+                help='applied before the contrast pivot; >1 deepens midtones and, '
+                     'unlike --contrast, leaves true black at true black')
 ap.add_argument('--lift', type=float, default=0.06, help='raise blacks')
 ap.add_argument('--gain', type=float, default=0.86)
 ap.add_argument('--saturation', type=float, default=0.0,
@@ -54,7 +57,8 @@ lum = x[:, :, 0]*0.2126 + x[:, :, 1]*0.7152 + x[:, :, 2]*0.0722
 # Pull chroma toward the luminance axis, keeping whatever fraction was asked for.
 muted = lum[..., None] + (x - lum[..., None]) * a.saturation
 
-curve = 0.5 + (lum - 0.5) * a.contrast     # flatten around mid
+base = lum ** a.gamma if a.gamma != 1.0 else lum
+curve = 0.5 + (base - 0.5) * a.contrast     # flatten around mid
 curve = curve * a.gain + a.lift             # gentle, keeps it off pure black
 curve = np.clip(curve, 0, 1)
 # Re-map brightness by ratio so the retained chroma rides along unchanged.

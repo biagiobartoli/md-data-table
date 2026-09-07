@@ -25,7 +25,11 @@ import styles from './section-three.module.css';
    push it past the 10px ceiling. */
 const MAX_PULL = 16;
 const PULL_CAP = 10;
-const TITLE_DRIFT = 16;  // px SALONE counter-moves, to open depth behind the plates
+/* SALONE counter-moves against the cursor to open depth behind the plates.
+   Halved from 16 now that the word is the section's heading rather than a
+   layer behind the gallery: a structural element that visibly slides when you
+   move the mouse over something below it reads as loose, not as deep. */
+const TITLE_DRIFT = 6;
 const EXPAND_FILL = 0.82; // share of the viewport an expanded plate targets
 
 type Cache = { cx: number; cy: number; r: number };
@@ -67,21 +71,17 @@ export default function SectionThree() {
          transform, and so each letter can carry its own z and rotation.
          ================================================================ */
       const mid = (chars.length - 1) / 2;
+      const track = desktop ? 30 : 13;
       chars.forEach((ch, i) => {
         const d = i - mid;                      // -2.5 .. 2.5 for SALONE
-        gsap.set(ch, {
-          x: d * (desktop ? 92 : 34),
-          y: (i % 2 ? 1 : -1) * (desktop ? 26 : 12) * (1 - Math.abs(d) / (mid + 1)),
-          z: -140 + (i % 3) * 70,
-          rotateY: d * -5,
-          rotateZ: d * 1.1,
-          opacity: 0.15 + 0.12 * (1 - Math.abs(d) / (mid + 1)),
-        });
+        gsap.set(ch, { yPercent: 118, x: d * track, z: -90, rotateX: 9 });
       });
+      gsap.set(`.${styles.rule}`, { scaleX: 0 });
 
       if (reduced) {
         /* No scrub, no cursor: the composition simply exists. */
-        gsap.set(chars, { x: 0, y: 0, z: 0, rotateY: 0, rotateZ: 0, opacity: 0.4 });
+        gsap.set(chars, { yPercent: 0, x: 0, z: 0, rotateX: 0 });
+        gsap.set(`.${styles.rule}`, { scaleX: 1 });
         gsap.set(entries, { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 });
         return;
       }
@@ -89,22 +89,25 @@ export default function SectionThree() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: root.current,
-          start: 'top 82%',
-          end: 'top 2%',
+          start: 'top 86%',
+          /* Longer than the old window: the heading has to land and be read
+             before the plates start arriving under it. */
+          end: 'top -18%',
           scrub: 0.85,
           invalidateOnRefresh: true,
         },
       });
 
       chars.forEach((ch, i) => {
-        const d = i - mid;
         tl.to(ch, {
-          x: 0, y: 0, z: 0, rotateY: 0, rotateZ: 0, opacity: 0.4,
-          duration: 60, ease: 'power2.inOut',
-          /* outer letters travel furthest, so they start first and all land
-             together — the word closes rather than snapping shut */
-        }, 8 - Math.abs(d) * 1.6);
+          yPercent: 0, x: 0, z: 0, rotateX: 0,
+          duration: 46, ease: 'power3.out',
+          /* Left to right, not from the centre out: the word is read, not
+             assembled, and a symmetrical stagger draws attention to the
+             mechanism instead of to the name. */
+        }, 2 + i * 4);
       });
+      tl.to(`.${styles.rule}`, { scaleX: 1, duration: 40, ease: 'power2.inOut' }, 26);
 
       /* ================================================================
          2. Plates — suspended prints settling into the composition
@@ -339,11 +342,34 @@ export default function SectionThree() {
 
   return (
     <section className={styles.three} ref={root} aria-label="Salone — galleria">
+      {/* Atmosphere. Screen-blended so the photograph's own black ground
+          disappears into the section instead of sitting on it as a rectangle —
+          only the flower adds light. Oversized and pushed off the left edge so
+          it reads as a crop rather than as a placed picture. */}
+      <div className={styles.flower} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/ni/salone-flower.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+
       <div
         className={`${styles.scrim} ${expanded !== null ? styles.scrimOn : ''}`}
         aria-hidden="true"
         onClick={() => api.current?.close()}
       />
+
+      {/* The heading owns the top of the section and is the first thing read.
+          Each letter rises out of its own mask, and the word closes its
+          tracking as it goes — the reveal and the composing are one move. */}
+      <header className={styles.head}>
+        <h2 className={styles.title} ref={title} aria-label={TITLE}>
+          {TITLE.split('').map((c, i) => (
+            <span className={styles.mask} key={i} aria-hidden="true">
+              <span className={styles.ch}>{c}</span>
+            </span>
+          ))}
+        </h2>
+        <span className={styles.rule} aria-hidden="true" />
+      </header>
 
       {/* The stage is lifted over the scrim while a plate is expanded. It has
           to be the stage and not the plate: .stage carries `perspective`, which
@@ -353,12 +379,6 @@ export default function SectionThree() {
         className={`${styles.stage} ${expanded !== null ? styles.stageLifted : ''}`}
         ref={stage}
       >
-        <h2 className={styles.title} ref={title} aria-label={TITLE}>
-          {TITLE.split('').map((c, i) => (
-            <span className={styles.ch} key={i} aria-hidden="true">{c}</span>
-          ))}
-        </h2>
-
         <Plates onActivate={paintFor} onClick={onPlateClick} expanded={expanded} />
       </div>
     </section>
