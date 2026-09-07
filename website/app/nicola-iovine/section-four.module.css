@@ -24,6 +24,14 @@
 .layer img{
   display:block; width:100%; height:100%;
   object-fit:cover; object-position:var(--pos);
+  /* A 10% fade toward the section's black, so the type and the panels breathe.
+     Deliberately on the img and not on .layer: the slideshow animates the
+     layer's opacity between 0 and 1, and putting the fade there would fight
+     the crossfade. Deliberately opacity and not a brightness filter: three
+     full-bleed images are the last place on this page to add a filter, and
+     fading toward the ground keeps the colour where a brightness cut would
+     start to flatten it. */
+  opacity:.9;
   will-change:transform;
 }
 

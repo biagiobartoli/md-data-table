@@ -332,8 +332,14 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
    to image 1 the moment the script ran. */
 .tLayer{ position:absolute; inset:0; opacity:0; will-change:opacity }
 .tLayer:first-child{ opacity:1 }
+/* A 10% fade toward the section's black, so the type and the panels breathe.
+   Deliberately on the img and not on .tLayer: the slideshow animates the
+   layer's opacity between 0 and 1, and putting the fade there would fight the
+   crossfade. Deliberately opacity and not a brightness filter: three full-bleed
+   images are the last place to add a filter, and fading toward the ground keeps
+   the colour where a brightness cut would start to flatten it. */
 .tLayer img{ display:block; width:100%; height:100%; object-fit:cover;
-  object-position:var(--pos); will-change:transform }
+  object-position:var(--pos); opacity:.9; will-change:transform }
 /* Three ramps, not one flat scrim: a vignette to seat the photograph, a bottom
    ramp to carry the list, a left ramp to carry the title. The colour in the
    middle of the frame is left alone, which is the point of the section. */
@@ -506,7 +512,11 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
    a heavy black layer would cost the warm wood and the metal, which is the
    whole reason the photograph is here. */
 .vBg{ position:absolute; inset:0; z-index:0; overflow:hidden }
-.vBg img{ display:block; width:100%; height:100%; object-fit:cover; object-position:52% 46% }
+/* The same 10% fade, toward the same kind of ground — but here the ground is
+   the warm #0A0705, so the wood and the metal keep their temperature instead
+   of cooling off as they recede. */
+.vBg img{ display:block; width:100%; height:100%; object-fit:cover;
+  object-position:52% 46%; opacity:.9 }
 /* Not one flat black sheet: a ramp from the top so the heading has ground to
    sit on, a vignette to seat the frame, and a very light overall veil. */
 .vAtmos{

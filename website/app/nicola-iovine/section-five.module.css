@@ -17,6 +17,10 @@
 .bg img{
   display:block; width:100%; height:100%;
   object-fit:cover; object-position:var(--bgPos);
+  /* The same 10% fade as section four, and toward the same kind of ground —
+     but here the ground is the warm #0A0705, so the wood and the metal keep
+     their temperature instead of cooling off as they recede. */
+  opacity:.9;
 }
 
 /* Not one flat black sheet. A ramp from the top so the heading has ground to
