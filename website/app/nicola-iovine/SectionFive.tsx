@@ -5,6 +5,7 @@ import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
 import { WORKS, WORKS_MOBILE, BACKGROUND, TITLE_LINES, KICKER } from './works';
 import styles from './section-five.module.css';
+import GalleryCursor from './GalleryCursor';
 
 /* Deliberately not SALONE's machinery. That section runs a cursor field over
    the whole stage and expands a plate to the viewport; this one has no field
@@ -157,6 +158,7 @@ export default function SectionFive() {
       <div className={styles.atmos} aria-hidden="true" />
 
       <header className={styles.head}>
+        <span className={styles.eyebrow}>05 — Lavori</span>
         <h2 className={styles.title} aria-label={TITLE_LINES.join(' ')}>
           {TITLE_LINES.map((line, li) => (
             <span className={li === 1 ? `${styles.line} ${styles.lineTwo}` : styles.line} key={li}>
@@ -202,6 +204,8 @@ export default function SectionFive() {
             </figure>
           );
         })}
+        {/* D. No label: see .cursorBare — nothing here opens on a click. */}
+        <GalleryCursor />
       </div>
     </section>
   );

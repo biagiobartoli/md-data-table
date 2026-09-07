@@ -165,7 +165,10 @@ export default function Scene() {
       tl.to(`.${styles.watermark}`, { opacity: 0, scale: 1.04, yPercent: -3, duration: 56 }, 22)
         .to(cut, { attr: { intercept: -15 }, duration: 62 }, 20)
         .to(`.${styles.dust}`, { yPercent: -4.5, scale: 1.022, duration: 70 }, 21)
-        .to(`.${styles.grain}`, { opacity: 0, duration: 44 }, 26)
+        /* The hero's own grain layer used to fade out here. It no longer
+           exists — the page carries one fixed grain over everything now — and
+           the grain must NOT fade during the dissolve anyway: it is what makes
+           the hero and section two read as the same photograph. */
         .to(`.${styles.heroBg}`, { opacity: 0, duration: 52 }, 36)
         .to(two, { opacity: 1, duration: 32 }, 40);
 

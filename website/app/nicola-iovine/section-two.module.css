@@ -33,7 +33,7 @@
   /* The treatment is baked, so opacity here is only about how much of the
      image belongs in the composition — high enough that the ash tones read as
      hair rather than as a smudge, low enough to stay a setting. */
-  display:block; opacity:.48;
+  display:block; opacity:.56;
   will-change:transform;
 }
 
@@ -74,7 +74,7 @@
   }
   /* A tall centre slice of the waves: the subject is centred, so a straight
      centre crop reads as an intentional detail rather than a cut-off photo. */
-  .bg img{ object-position:50% 46%; opacity:.26 }
+  .bg img{ object-position:50% 46%; opacity:.32 }
       .head{ font-size:clamp(2.2rem,10.5vw,3.4rem) }
 }
 

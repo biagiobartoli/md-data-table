@@ -12,6 +12,32 @@
   isolation:isolate;
 }
 
+
+/* ---------- A. the joins ---------- */
+/* Every section ground on this page is a different near-black — #050505 in the
+   scene and in four and six, #08090A at the foot of three, warm #0A0705 in
+   five — and two of them are full-bleed photographs that simply stopped at the
+   section edge. Butted together those make a visible seam: not a bright line,
+   but a step in tone that tells you where one screen ended.
+
+   So each section carries a bridge at the top in the colour of the section
+   above it and, where the grounds differ, one at the bottom in the colour of
+   the section below. Each fades to transparent over about a tenth of a screen,
+   which is longer than the eye can resolve as an edge and shorter than a
+   reader will spend scrolling past it. The two bridges overlap across the
+   boundary, so the handoff is a crossfade rather than a butt joint.
+
+   z-index sits above the section's own background layers and below its
+   content: the bridge is meant to veil the photograph, not the type. */
+.three::before,.three::after{
+  content:''; position:absolute; left:0; right:0; z-index:1;
+  height:clamp(80px,11vh,170px); pointer-events:none;
+}
+/* from the scene's ground */
+.three::before{ top:0; background:linear-gradient(180deg,#050505 0%,rgba(5,5,5,0) 100%) }
+/* into section four's */
+.three::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
+
 /* ---------- flower: atmosphere, not subject ---------- */
 /* Screen blending is what keeps this from reading as a pasted rectangle: the
    source photograph sits on a true black ground (measured p50 luminance
@@ -24,9 +50,13 @@
 .flower img{
   position:absolute; right:-10%; top:50%;
   width:auto; height:100%;
-  transform:translateY(-50%);
+  /* The -50% is the centring; the pointer term is C's parallax, 9px at the
+     extremes. Composed in one declaration because a second transform rule
+     would replace this one rather than add to it. */
+  transform:translateY(-50%)
+            translate3d(calc(var(--ni-px,0) * 9px), calc(var(--ni-py,0) * 9px), 0);
   mix-blend-mode:screen;
-  opacity:.34;
+  opacity:.4;
   /* Hung off the right, where the heading is not: SALONE is left-aligned, and
      a flower behind it would fight the one thing the section is named for.
      The right offset is what lands the photograph's own subject (which sits in
@@ -66,6 +96,18 @@
 /* Above the scrim, so the expanded plate is lit while everything around it is
    not. The other plates supply their own darkening through .isRecessed. */
 .stageLifted{ z-index:60 }
+
+/* H. Section index. Deliberately identical everywhere — same face, size,
+   tracking and colour as sections two, four and six — so the six labels read as
+   one running series rather than as six separate decorations. */
+.eyebrow{
+  display:block;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase;
+  color:#7E9799;
+  margin:0 0 clamp(14px,2vh,24px);
+}
+
 
 /* ---------- SALONE ---------- */
 .title{
@@ -112,11 +154,16 @@
   display:block; width:100%; height:100%; padding:0; border:0;
   background:none; cursor:pointer; appearance:none;
   transform-style:preserve-3d; will-change:transform;
-  /* Resting state: deeply muted and sitting back, so that restoring the
-     photograph on hover is an event rather than a nudge. The grade is here
-     rather than baked into the files precisely because hover has to undo it. */
-  filter:saturate(.28) brightness(.5) contrast(1.02);
-  opacity:.82;
+  /* Resting state: muted and sitting back, so that restoring the photograph
+     on hover is an event rather than a nudge. The grade is here rather than
+     baked into the files precisely because hover has to undo it.
+     It used to be saturate(.28) brightness(.5), which measured out at a mean
+     chroma of 0.012 against 0.064 in section five — the gallery was reading as
+     grey next to the sections either side of it. The plates are baked with
+     colour in them (0.05–0.25); this now lets enough of it through to sit in
+     the same world, while still leaving hover somewhere to go. */
+  filter:saturate(.62) brightness(.66) contrast(1.0);
+  opacity:.88;
   transition:filter .6s ease, opacity .6s ease;
 }
 .card img{
@@ -135,8 +182,8 @@
    costing a third of the frames. The recede is carried by scale, translateZ,
    brightness and opacity instead, all of which are free by comparison. */
 .card.isRecessed{
-  filter:saturate(.2) brightness(.38) contrast(.98);
-  opacity:.46;
+  filter:saturate(.44) brightness(.48) contrast(.98);
+  opacity:.5;
 }
 .card:focus-visible{ outline:1px solid rgba(183,200,200,.8); outline-offset:8px }
 
@@ -159,15 +206,20 @@
   .rule{ width:clamp(44px,16vw,78px) }
   /* Weaker and pushed further out: on a phone the flower has the whole width
      to itself and would otherwise read as the subject. */
-  .flower img{ right:-34%; height:52%; opacity:.26 }
+  .flower img{ right:-34%; height:52%; opacity:.3 }
   .plate{ left:var(--mx); top:var(--my); width:var(--mw); aspect-ratio:var(--mratio) }
   .card img{ box-shadow:0 12px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(190,200,204,.07) }
   /* No cursor here, so nothing is ever "receded by proximity" — only the
      tapped plate lifts and the rest soften, a touch further than on desktop. */
-  .card.isRecessed{ filter:saturate(.2) brightness(.36) contrast(.98); opacity:.42 }
+  .card.isRecessed{ filter:saturate(.42) brightness(.46) contrast(.98); opacity:.46 }
 }
 
 @media (prefers-reduced-motion:reduce){
+  /* The pointer field is never published under reduced motion, so the
+     parallax term already resolves to zero; this drops the promoted
+     layer the translate3d would otherwise leave behind. */
+  .flower img{ transform:translateY(-50%) }
+
   .card{ transition:none }
   .scrim{ transition:none }
 }

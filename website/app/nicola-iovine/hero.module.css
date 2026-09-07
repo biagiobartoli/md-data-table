@@ -10,6 +10,12 @@
   --accent:#6F9FA3;
   --accent-2:#789486;
   --accent-soft:#B7C8C8;
+  /* Note on the pointer field: PageChrome publishes --ni-px / --ni-py on the
+     document element, and consumers read them as var(--ni-px,0). They are
+     deliberately NOT defaulted here — a declaration on this element would win
+     over the inherited one and pin the field at zero forever. The fallback in
+     each var() is what covers the server, touch devices and reduced motion,
+     where the properties are never written at all. */
   background:var(--ink);
   color:var(--silver);
   min-height:100svh;
@@ -58,6 +64,12 @@
 }
 .watermark img{
   width:100%; height:100%; object-fit:contain; display:block;
+  /* C. pointer parallax. 7px at the extremes, on the layer furthest back —
+     enough that the monogram and the title stop feeling welded together, small
+     enough that you cannot point at it. The properties are only ever written on
+     a desktop with a fine pointer, so the fallback of 0 is what mobile, touch
+     and reduced motion all get. */
+  transform:translate3d(calc(var(--ni-px,0) * 7px), calc(var(--ni-py,0) * 7px), 0);
   /* the asset is already repainted silver; opacity alone sets it behind the
      title without turning the mark grey-on-grey */
   opacity:.15;
@@ -65,12 +77,11 @@
 
 /* ---------- surface ---------- */
 
-.grain{
-  position:absolute; inset:-50%; z-index:9; pointer-events:none; opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode:overlay;
-}
-
+/* The hero used to carry its own grain layer here. It is gone: the page now
+   has one fixed grain over everything (see chrome.module.css), and two
+   overlapping noise layers would have made the hero visibly grainier than
+   the section it dissolves into — which is precisely the seam the grain
+   exists to hide. */
 /* ---------- navigation ---------- */
 .nav{
   position:relative; z-index:10; opacity:0;
@@ -88,6 +99,19 @@
   color:var(--dim); text-decoration:none; transition:color .5s ease;
 }
 .links a:hover{ color:var(--silver) }
+/* E. the section the reader is currently in. No underline, no pill, no colour
+   change large enough to be a state: the label simply comes up out of the dim
+   grey the others sit in, with a 3px hairline under it. At this size that reads
+   as "you are here" without ever reading as a selected tab. */
+.links a.linkOn{ color:var(--silver-hi) }
+.links a{ position:relative }
+.links a::after{
+  content:''; position:absolute; left:0; bottom:-7px;
+  width:3px; height:1px; background:var(--accent-soft);
+  opacity:0; transform:translateY(2px);
+  transition:opacity .55s ease, transform .55s ease;
+}
+.links a.linkOn::after{ opacity:.85; transform:translateY(0) }
 .links a:focus-visible{ outline:1px solid var(--silver); outline-offset:7px; color:var(--silver) }
 .mark:focus-visible{ outline:1px solid var(--silver); outline-offset:7px }
 
@@ -116,6 +140,38 @@
   transition:color .5s ease, border-color .5s ease,
              background-color .5s ease, box-shadow .5s ease;
 }
+
+/* G. The automatic accent. A single soft band crosses the button roughly every
+   nine seconds and is off-screen for the other seven — the whole point is that
+   you catch it in the corner of your eye rather than watch it. Kept to one
+   pass, one direction, and an opacity that never reaches a highlight: a light
+   moving over the surface, not a shine turning on.
+
+   On ::before so the nav CTA needs no extra markup, and so the element the
+   hover sheen already uses stays free — an animation on transform would
+   override that transition and the hover would silently stop working. */
+@keyframes ctaTravel{
+  0%        { transform:translateX(-160%) skewX(-14deg); opacity:0 }
+  4%        { opacity:1 }
+  22%       { opacity:1 }
+  26%, 100% { transform:translateX(320%) skewX(-14deg); opacity:0 }
+}
+.cta{ position:relative; overflow:hidden }
+/* ::after, not ::before: the mobile rules below already use ::before to grow
+   this button's tap target, and one pseudo-element cannot be both a hit area
+   (which must take pointer events) and a sheen (which must not). */
+.cta::after{
+  content:''; position:absolute; top:0; bottom:0; left:0; width:40%;
+  background:linear-gradient(100deg,
+    rgba(226,199,150,0) 0%, rgba(226,199,150,.13) 50%, rgba(226,199,150,0) 100%);
+  pointer-events:none;
+  animation:ctaTravel 9s cubic-bezier(.4,.05,.35,1) infinite;
+  animation-delay:4s;
+}
+/* The travelling light is decoration on top of the label. It must never be the
+   thing that makes the label legible, and it must never move under one. */
+.cta:hover::after{ animation-play-state:paused }
+
 .cta:hover{
   color:var(--gold-lit);
   border-color:rgba(210,180,126,.7);
@@ -205,6 +261,8 @@
   font-family:var(--ni-ui),system-ui,sans-serif;
   font-size:9px; letter-spacing:.32em; text-transform:uppercase; color:var(--dim);
 }
+.footLead{ display:flex; align-items:baseline; gap:clamp(14px,1.8vw,26px) }
+.index{ color:#7E9799 }
 .scroll{ display:flex; align-items:center; gap:12px }
 .scroll::after{
   content:""; display:block; width:1px; height:34px;
@@ -268,4 +326,11 @@
   .ch{ transform:none }
   .sub,.nav,.foot,.watermark{ opacity:1 }
   .rule{ transform:scaleX(1) }
+  /* The travelling light is the one thing on this page that moves without
+     being asked to, so it is the first thing to go. */
+  .cta::after{ animation:none; display:none }
+  .links a::after{ transition:none }
+  /* The pointer field is never written under reduced motion, but the
+     translate3d would still promote a layer for nothing. */
+  .watermark img{ transform:none }
 }

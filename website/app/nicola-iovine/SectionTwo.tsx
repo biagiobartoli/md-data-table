@@ -19,7 +19,7 @@ export default function SectionTwo() {
       </div>
 
       <div className={styles.inner}>
-        <span className={styles.eyebrow}>01 — Il Salone</span>
+        <span className={styles.eyebrow}>02 — Storia</span>
 
         {/* Split into lines so each can rise out of its own mask. The masks
             carry padding-bottom with a matching negative margin, or they clip

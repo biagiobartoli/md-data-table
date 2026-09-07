@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { gsap } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
 import styles from './hero.module.css';
@@ -8,9 +8,60 @@ import { whatsappHref } from './contact';
 
 const WORDS = ['NICOLA', 'IOVINE'];
 
+/* The nav, as label plus the section it points at. The labels are the ones
+   that were already there — renaming Servizi and Gallery to match the section
+   headings would change the nav's appearance, which was out of scope. */
+const LINKS = [
+  { id: 'salone', label: 'Salone' },
+  { id: 'trattamenti', label: 'Servizi' },
+  { id: 'lavori', label: 'Gallery' },
+  { id: 'contatti', label: 'Contatti' },
+];
+
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   const logo = useRef<HTMLImageElement>(null);
+  /* E. which section the reader is in. '' while they are still above the first
+     one, which is correct — the hero is not in the nav. */
+  const [active, setActive] = useState('');
+
+  /* Deliberately its own effect, outside the GSAP context: it owns no tween and
+     must keep running after ctx.revert() would have torn one down. */
+  useIsomorphicLayoutEffect(() => {
+    const els = LINKS
+      .map((l) => document.getElementById(l.id))
+      .filter((e): e is HTMLElement => !!e);
+    if (!els.length) return;
+
+    /* Which section is "current" is a judgement, not a measurement: sections
+       here are between one and two screens tall and two are always partly
+       visible. The rule is the one a reader would give — whichever section
+       covers the middle of the screen — so the marker changes exactly once per
+       boundary instead of flickering between two of them.
+
+       Read on scroll rather than by IntersectionObserver threshold, because a
+       threshold on a 2vh section never fires at all on a short viewport. */
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const mid = window.innerHeight / 2;
+      let found = '';
+      for (const el of els) {
+        const r = el.getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) found = el.id;
+      }
+      setActive(found);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(measure); };
+    measure();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
 
   useIsomorphicLayoutEffect(() => {
     /* A 404 can resolve before React attaches onError, so re-check on mount:
@@ -114,14 +165,20 @@ export default function Hero() {
       <nav className={styles.nav}>
         <a className={styles.mark} href="#" aria-label="Nicola Iovine">NI</a>
         <div className={styles.navEnd}>
-          {/* Wired to the sections that now exist. The labels are untouched —
-              renaming Servizi and Gallery to match the section headings would
-              change the nav's appearance, which was explicitly out of scope. */}
           <ul className={styles.links}>
-            <li><a href="#salone">Salone</a></li>
-            <li><a href="#trattamenti">Servizi</a></li>
-            <li><a href="#lavori">Gallery</a></li>
-            <li><a href="#contatti">Contatti</a></li>
+            {LINKS.map((l) => (
+              <li key={l.id}>
+                <a
+                  href={`#${l.id}`}
+                  className={active === l.id ? styles.linkOn : undefined}
+                  /* Announced, not just drawn: a marker a sighted reader can see
+                     is a marker a screen reader should hear. */
+                  aria-current={active === l.id ? 'true' : undefined}
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))}
           </ul>
           {/* Contact, not booking: this opens a WhatsApp chat with the salon.
               The number lives in ./contact.ts and nowhere else. */}
@@ -161,11 +218,17 @@ export default function Hero() {
       </div>
 
       <div className={`${styles.foot} ${styles.dust}`}>
-        <span>Hair Design · Color · Style</span>
+        {/* H. The head of the section index. The other five labels sit above
+            their headings; the hero has no heading to sit above, so its number
+            goes in the foot line it already had — same face and tracking, one
+            step dimmer, ahead of the tagline that was already there. */}
+        <span className={styles.footLead}>
+          <span className={styles.index}>01 — Intro</span>
+          <span>Hair Design · Color · Style</span>
+        </span>
         <span className={styles.scroll}>Scroll</span>
       </div>
 
-      <div className={styles.grain} aria-hidden="true" />
     </main>
   );
 }

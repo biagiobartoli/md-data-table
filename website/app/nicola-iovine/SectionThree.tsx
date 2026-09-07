@@ -6,6 +6,7 @@ import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
 import { lockScroll, unlockScroll } from '@/lib/scrollLock';
 import { PLATES, PLATES_MOBILE, TITLE, type Plate } from './gallery';
 import styles from './section-three.module.css';
+import GalleryCursor from './GalleryCursor';
 
 /* Each plate is four nested boxes rather than one, because four different
    things want to move it and they must not fight over one transform:
@@ -361,6 +362,10 @@ export default function SectionThree() {
           Each letter rises out of its own mask, and the word closes its
           tracking as it goes — the reveal and the composing are one move. */}
       <header className={styles.head}>
+        {/* H. The index. Sections two, four and six already carried one; three
+            and five did not, and the numbering that existed did not match the
+            order the sections are actually read in. One run of six now. */}
+        <span className={styles.eyebrow}>03 — Salone</span>
         <h2 className={styles.title} ref={title} aria-label={TITLE}>
           {TITLE.split('').map((c, i) => (
             <span className={styles.mask} key={i} aria-hidden="true">
@@ -380,6 +385,11 @@ export default function SectionThree() {
         ref={stage}
       >
         <Plates onActivate={paintFor} onClick={onPlateClick} expanded={expanded} />
+        {/* D. Unmounted while a plate is open, which both hides the ring and
+            hands the native cursor back — and the native cursor is the right
+            one there, because .scrim already sets zoom-out to say what a click
+            will now do. */}
+        {expanded === null && <GalleryCursor label="Apri" />}
       </div>
     </section>
   );

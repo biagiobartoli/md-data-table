@@ -137,7 +137,7 @@ export default function SectionFour() {
 
       <div className={styles.content}>
         <header className={styles.head}>
-          <span className={styles.eyebrow}>03 — Campagna</span>
+          <span className={styles.eyebrow}>04 — Trattamenti</span>
           <h2 className={styles.title} aria-label={TITLE}>
             {TITLE.split('').map((c, i) => (
               <span className={styles.mask} key={i} aria-hidden="true">

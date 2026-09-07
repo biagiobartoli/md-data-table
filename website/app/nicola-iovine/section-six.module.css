@@ -12,6 +12,30 @@
   overflow:hidden;
   isolation:isolate;
 }
+
+/* ---------- A. the joins ---------- */
+/* Every section ground on this page is a different near-black — #050505 in the
+   scene and in four and six, #08090A at the foot of three, warm #0A0705 in
+   five — and two of them are full-bleed photographs that simply stopped at the
+   section edge. Butted together those make a visible seam: not a bright line,
+   but a step in tone that tells you where one screen ended.
+
+   So each section carries a bridge at the top in the colour of the section
+   above it and, where the grounds differ, one at the bottom in the colour of
+   the section below. Each fades to transparent over about a tenth of a screen,
+   which is longer than the eye can resolve as an edge and shorter than a
+   reader will spend scrolling past it. The two bridges overlap across the
+   boundary, so the handoff is a crossfade rather than a butt joint.
+
+   z-index sits above the section's own background layers and below its
+   content: the bridge is meant to veil the photograph, not the type. */
+.six::before{
+  content:''; position:absolute; top:0; left:0; right:0; z-index:1;
+  height:clamp(80px,11vh,170px); pointer-events:none;
+  /* from section five's warm ground. No bridge at the foot: the page ends
+     here, and there is nothing on the other side to hand off to. */
+  background:linear-gradient(180deg,#0A0705 0%,rgba(10,7,5,0) 100%);
+}
 .atmos{
   position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
@@ -23,10 +47,22 @@
 /* The town, once, very quietly, behind the footer. It is the third thing the
    site says after the name and the invitation. */
 .place{
-  position:absolute; left:50%; bottom:-2.5vw; translate:-50% 0; z-index:0;
+  position:absolute; left:50%; bottom:-2.2vw; translate:-50% 0; z-index:0;
   font-family:var(--ni-display),"Times New Roman",serif;
-  font-weight:300; font-size:20vw; line-height:.8; letter-spacing:.06em;
-  color:#fff; opacity:.022; white-space:nowrap; pointer-events:none;
+  /* Two words instead of one, so it sets far wider at the same size — 11vw
+     rather than the 20vw CHIAVARI used, which lands the lockup at 93% of the
+     viewport at every width. It was 13vw first and overhung both edges by
+     70-odd pixels: harmless, since the section clips, but a name cropped at
+     exactly the N and the E reads as a mistake rather than as a bleed. */
+  font-weight:300; font-size:11vw; line-height:.8; letter-spacing:.09em;
+  /* Barely there on purpose: at 0.028 on #050505 the mark is a change in the
+     black rather than a thing written on it. Any higher and it stops being
+     atmosphere and starts being a headline nobody asked for. */
+  color:#fff; opacity:.028; white-space:nowrap; pointer-events:none;
+  /* C. the same pointer field the rest of the page reads, at the smallest
+     amplitude anywhere — the mark is the furthest-back layer on the page and
+     should barely register as moving at all. */
+  transform:translate3d(calc(var(--ni-px,0) * 5px), calc(var(--ni-py,0) * 5px), 0);
 }
 .inner{ position:relative; z-index:1; width:min(1320px,100%); margin:0 auto }
 
@@ -88,6 +124,54 @@
   transition:color .5s ease, border-color .5s ease,
              background-color .5s ease, box-shadow .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
+
+/* G. The automatic accent. A single soft band crosses the button roughly every
+   nine seconds and is off-screen for the other seven — the whole point is that
+   you catch it in the corner of your eye rather than watch it. Kept to one
+   pass, one direction, and an opacity that never reaches a highlight: a light
+   moving over the surface, not a shine turning on.
+
+   On ::before so the nav CTA needs no extra markup, and so the element the
+   hover sheen already uses stays free — an animation on transform would
+   override that transition and the hover would silently stop working. */
+@keyframes ctaTravel{
+  0%        { transform:translateX(-160%) skewX(-14deg); opacity:0 }
+  4%        { opacity:1 }
+  22%       { opacity:1 }
+  26%, 100% { transform:translateX(320%) skewX(-14deg); opacity:0 }
+}
+.cta::before{
+  content:''; position:absolute; top:0; bottom:0; left:0; width:38%;
+  background:linear-gradient(100deg,
+    rgba(232,206,160,0) 0%, rgba(232,206,160,.12) 50%, rgba(232,206,160,0) 100%);
+  pointer-events:none;
+  animation:ctaTravel 9s cubic-bezier(.4,.05,.35,1) infinite;
+  /* Offset from the nav button's delay so the two are never in step. Two
+     buttons lighting up together would read as a page effect; apart, each one
+     reads as its own quiet invitation. */
+  animation-delay:1.4s;
+}
+.cta:hover::before{ animation-play-state:paused }
+
+/* CHIAMA has no frame to travel around, only its underline — so the light
+   travels along that instead. Same rhythm, a third of the presence. */
+.ghost{ position:relative }
+.ghost::after{
+  content:''; position:absolute; bottom:-1px; left:0; width:34%; height:1px;
+  background:linear-gradient(90deg,
+    rgba(183,200,200,0), rgba(183,200,200,.5), rgba(183,200,200,0));
+  pointer-events:none;
+  animation:ghostTravel 9s cubic-bezier(.4,.05,.35,1) infinite;
+  animation-delay:6.2s;
+}
+@keyframes ghostTravel{
+  0%        { transform:translateX(-120%); opacity:0 }
+  5%        { opacity:1 }
+  21%       { opacity:1 }
+  26%, 100% { transform:translateX(320%); opacity:0 }
+}
+.ghost:hover::after{ animation-play-state:paused }
+
 /* A light that travels the edge, not a fill that floods it. */
 .ctaSheen{
   position:absolute; top:0; bottom:0; left:-60%; width:45%;
@@ -256,7 +340,13 @@ a.footTiny{ transition:color .4s ease }
 /* ---------- mobile ---------- */
 @media (max-width:860px){
   .six{ padding:clamp(64px,9vh,96px) 20px clamp(22px,3vh,32px) }
-  .place{ font-size:30vw; bottom:-4vw; opacity:.026 }
+  /* Two words at 30vw would set roughly three screens wide. Broken onto two
+     lines instead and centred, which is also the only arrangement that reads
+     as a lockup rather than as a word running off both edges. */
+  .place{
+    font-size:22vw; bottom:-3vw; opacity:.03;
+    white-space:normal; text-align:center; width:96vw; line-height:.86;
+  }
   /* One column, in the order the brief asks for: ask, then details, then
      reviews, then footer. */
   .top{ grid-template-columns:1fr; gap:clamp(30px,5vh,44px) }
@@ -288,4 +378,6 @@ a.footTiny{ transition:color .4s ease }
   .viewport{ overflow-x:auto; cursor:default; -webkit-mask-image:none; mask-image:none }
   .cta,.ghost,.card,.address,.arrow,.ctaSheen{ transition:none }
   .ctaSheen{ display:none }
+  .cta::before,.ghost::after{ animation:none; display:none }
+  .place{ transform:none }
 }

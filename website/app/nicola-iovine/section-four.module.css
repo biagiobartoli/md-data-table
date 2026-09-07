@@ -14,6 +14,33 @@
   isolation:isolate;
 }
 
+/* ---------- A. the joins ---------- */
+/* Every section ground on this page is a different near-black — #050505 in the
+   scene and in four and six, #08090A at the foot of three, warm #0A0705 in
+   five — and two of them are full-bleed photographs that simply stopped at the
+   section edge. Butted together those make a visible seam: not a bright line,
+   but a step in tone that tells you where one screen ended.
+
+   So each section carries a bridge at the top in the colour of the section
+   above it and, where the grounds differ, one at the bottom in the colour of
+   the section below. Each fades to transparent over about a tenth of a screen,
+   which is longer than the eye can resolve as an edge and shorter than a
+   reader will spend scrolling past it. The two bridges overlap across the
+   boundary, so the handoff is a crossfade rather than a butt joint.
+
+   z-index sits above the section's own background layers and below its
+   content: the bridge is meant to veil the photograph, not the type. */
+.four::before,.four::after{
+  content:''; position:absolute; left:0; right:0; z-index:6;
+  height:clamp(80px,11vh,170px); pointer-events:none;
+}
+/* from the foot of section three */
+.four::before{ top:0; background:linear-gradient(180deg,#08090A 0%,rgba(8,9,10,0) 100%) }
+/* into section five's warm ground — this is the join the slideshow needed
+   most, because a photograph that changes every few seconds otherwise ends on
+   a hard horizontal edge four or five times a minute */
+.four::after{ bottom:0; background:linear-gradient(0deg,#0A0705 0%,rgba(10,7,5,0) 100%) }
+
 /* ---------- backdrop ---------- */
 .bg{ position:absolute; inset:0; z-index:0 }
 /* Only the first layer is painted until the cycle takes over. Without this the

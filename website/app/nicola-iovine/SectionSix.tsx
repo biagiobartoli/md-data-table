@@ -171,13 +171,17 @@ export default function SectionSix() {
       aria-label="Contatti e prenotazioni"
     >
       <div className={styles.atmos} aria-hidden="true" />
-      <span className={styles.place} aria-hidden="true">CHIAVARI</span>
+      {/* I. The wordmark behind the footer. It used to read CHIAVARI; the brief
+          asked for the name here, so the town has given the slot up to it — it
+          is still on the page twice over, in the address and in the directions
+          link, which is where a reader looks for it anyway. */}
+      <span className={styles.place} aria-hidden="true">NICOLA IOVINE</span>
 
       <div className={styles.inner}>
         <div className={styles.top}>
           {/* ---- left: the ask ---- */}
           <div className={styles.ask}>
-            <span className={`${styles.eyebrow} ${styles.reveal}`}>05 — Contatti</span>
+            <span className={`${styles.eyebrow} ${styles.reveal}`}>06 — Contatti</span>
             <h2 className={styles.title} aria-label={TITLE_LINES.join(' ')}>
               {TITLE_LINES.map((line, li) => (
                 <span className={styles.line} key={li}>
