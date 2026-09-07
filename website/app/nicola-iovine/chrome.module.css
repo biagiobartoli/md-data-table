@@ -122,8 +122,10 @@
      sits half a space right of centre without this. */
   padding-left:.3em;
 }
-/* I NOSTRI LAVORI has no expansion — hovering lifts a plate and names it, and
-   clicking does nothing on a desktop. So it gets the ring without a word in
-   it: the same cursor vocabulary, minus a verb it would not honour. Smaller,
-   because there is nothing inside it to hold apart. */
+/* The ring without a word, for a gallery whose plates do not open. Both of
+   them do now, so nothing on the page uses this — but GalleryCursor still
+   renders it when no label is passed, and that pairing is the point: a ring
+   with a verb in it is a promise, and a gallery that does not open must not
+   make one. Deleting the class without deleting that branch would leave the
+   component styling itself with a name that no longer exists. */
 .cursorBare{ width:26px; height:26px; background:rgba(8,10,11,.18) }

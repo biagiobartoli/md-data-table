@@ -714,6 +714,11 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
   position:relative; z-index:2; width:min(1320px,100%); margin:0 auto;
   aspect-ratio:16/8.4; perspective:1500px; perspective-origin:50% 45%;
 }
+/* Above the scrim while a plate is expanded. It has to be the stage and not
+   the plate: .vStage carries `perspective`, which makes it a stacking context,
+   so a z-index on a plate inside it can never climb past a sibling of .vStage
+   however high it is set. Same reason as in SALONE. */
+.vStageLifted{ z-index:60 }
 /* .vPlate is layout only and never transformed. */
 .vPlate{ position:absolute; margin:0; left:var(--x); top:var(--y); width:var(--w);
          aspect-ratio:var(--ratio) }
@@ -739,7 +744,20 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
   white-space:nowrap; opacity:0; transform:translateY(-4px);
   transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
+/* The caption sits below the plate. On an expanded plate that puts it under
+   the bottom of the screen, so it goes away for the duration — the photograph
+   is the point at that size, and the name is already in the button's
+   accessible label. */
 .vCard.isOn .vLabel{ opacity:1; transform:translateY(0) }
+.vCard.isExpanded .vLabel{ opacity:0 }
+
+/* Expansion scrim. The same ground as SALONE's at the same value: the two
+   galleries open the same way, so they dim the page the same amount. */
+.vScrim{
+  position:fixed; inset:0; z-index:50; background:rgba(5,6,7,.86);
+  opacity:0; pointer-events:none; transition:opacity .8s ease;
+}
+.vScrim.on{ opacity:1; pointer-events:auto; cursor:zoom-out }
 /* Mobile: a separate arrangement — two staggered columns, no overlaps. */
 @media (max-width:860px){
   .five{ padding:clamp(64px,9vh,104px) 20px clamp(72px,11vh,120px) }
@@ -1242,10 +1260,12 @@ a.wFootTiny{ transition:color .4s ease }
     <span class="vRule" id="vRule" aria-hidden="true"></span>
     <p class="vKicker" id="vKicker">Colore, styling e trasformazione</p>
   </header>
+  <div class="vScrim" id="vScrim" aria-hidden="true"></div>
   <div class="vStage" id="vStage"><!-- plates built in the script -->
-    <!-- D. No label: nothing here opens on a click, and a verb would be a
-         promise the section does not keep. -->
-    <div class="niCursor niCursorBare" id="vCursor" aria-hidden="true"></div>
+    <!-- D. These plates open now, so the ring carries the same word SALONE's
+         does — the two galleries behave identically, so they should say the
+         same thing. -->
+    <div class="niCursor" id="vCursor" aria-hidden="true"><span class="niCursorLabel">Apri</span></div>
   </div>
 </section>
 
@@ -1449,6 +1469,27 @@ a.wFootTiny{ transition:color .4s ease }
     addEventListener('resize', measure);
   })();
 
+  /* ---- the scroll lock, shared by both galleries ------------------------ */
+  /* Deliberately NOT overflow:hidden. On an already-scrolled page that clamps
+     the scroll position and the page jumps, which drags the expanded plate off
+     centre and breaks its return to origin. Stop Lenis, swallow the raw
+     inputs, leave the document exactly where it is. */
+  var SCROLL_KEYS = { ArrowUp:1, ArrowDown:1, PageUp:1, PageDown:1, Home:1, End:1, ' ':1 };
+  function swallow(e) { e.preventDefault(); }
+  function swallowKeys(e) { if (SCROLL_KEYS[e.key]) e.preventDefault(); }
+  function lockScroll() {
+    if (window.__niLenis) window.__niLenis.stop();
+    addEventListener('wheel', swallow, { passive: false });
+    addEventListener('touchmove', swallow, { passive: false });
+    addEventListener('keydown', swallowKeys, { passive: false });
+  }
+  function unlockScroll() {
+    removeEventListener('wheel', swallow);
+    removeEventListener('touchmove', swallow);
+    removeEventListener('keydown', swallowKeys);
+    if (window.__niLenis) window.__niLenis.start();
+  }
+
   /* ---- D. the gallery cursors ------------------------------------------ */
   /* Only in the two galleries. Not global: everywhere else on this page the
      system cursor carries real information, and replacing it makes the page
@@ -1468,27 +1509,57 @@ a.wFootTiny{ transition:color .4s ease }
        exactly would just be a differently shaped arrow. */
     var toX = gsap.quickTo(ring, 'x', { duration: 0.18, ease: 'power3' });
     var toY = gsap.quickTo(ring, 'y', { duration: 0.18, ease: 'power3' });
-    function hide() { gsap.to(ring, { autoAlpha: 0, scale: 0.6, duration: 0.25, ease: 'power2.in' }); }
+    var shown = false, enabled = true;
+    function show(e) {
+      if (shown || !enabled) return;
+      shown = true;
+      // Place it before it appears, or it fades in at the last position.
+      var r = el.getBoundingClientRect();
+      gsap.set(ring, { x: e.clientX - r.left, y: e.clientY - r.top });
+      /* overwrite, on both of these. A click that arrives in the same gesture
+         that revealed the ring starts a 0.32s fade-in and then, from the
+         expansion, a 0.25s fade-out — and with GSAP's default they both run, so
+         the fade-IN finishes last and the ring is left fully visible over the
+         scrim. The later call has to kill the earlier one. */
+      gsap.to(ring, { autoAlpha: 1, scale: 1, duration: 0.32, ease: 'power2.out', overwrite: 'auto' });
+    }
+    function hide() {
+      shown = false;
+      gsap.to(ring, { autoAlpha: 0, scale: 0.6, duration: 0.25, ease: 'power2.in', overwrite: 'auto' });
+    }
     el.addEventListener('pointermove', function (e) {
+      /* A move reveals the ring as well as steering it, and pointerenter is
+         only an optimisation on top of that. It has to work this way: both
+         galleries hide the ring while a plate is expanded, and the pointer is
+         still inside the stage when it closes — pointerenter cannot fire for a
+         pointer that never left. Revealing on enter alone left the ring
+         invisible after every close until you moved out of the gallery and
+         back in. */
+      show(e);
       var r = el.getBoundingClientRect();
       toX(e.clientX - r.left); toY(e.clientY - r.top);
     });
-    el.addEventListener('pointerenter', function (e) {
-      var r = el.getBoundingClientRect();
-      // Place it before it appears, or it fades in at the last position.
-      gsap.set(ring, { x: e.clientX - r.left, y: e.clientY - r.top });
-      gsap.to(ring, { autoAlpha: 1, scale: 1, duration: 0.32, ease: 'power2.out' });
-    });
+    el.addEventListener('pointerenter', show);
     el.addEventListener('pointerleave', hide);
     addEventListener('blur', hide);
-    return { el: el, ring: ring, hide: hide };
+    /* Turned off for the duration of an expansion rather than merely hidden.
+       Hiding alone was not enough once a pointer *move* began revealing the
+       ring: the plate fills the screen, so the pointer is inside the stage the
+       whole time it is open, and the first twitch of the mouse brought the ring
+       straight back over the scrim. Off means the handlers do nothing and the
+       native cursor — zoom-out, from the scrim — is what you see. */
+    function setEnabled(on) {
+      enabled = on;
+      if (on) { el.classList.add('hideNative'); }
+      else { hide(); el.classList.remove('hideNative'); }
+    }
+    return { el: el, ring: ring, hide: hide, setEnabled: setEnabled };
   }
-  var gCursor = galleryCursor('gStage', 'gCursor');
-  galleryCursor('vStage', 'vCursor');
-  /* Exposed so section three can put the ring away while a plate is open: the
-     native zoom-out cursor is the right one there, because that is what a click
-     now does. */
-  window.__niGalleryCursor = gCursor;
+  /* Exposed so each gallery can put its own ring away while a plate is open:
+     the native zoom-out cursor is the right one there, because that is what a
+     click does once the scrim is up. */
+  window.__niGalleryCursor = galleryCursor('gStage', 'gCursor');
+  window.__niWorksCursor   = galleryCursor('vStage', 'vCursor');
 
 
   if (!reduced && window.Lenis) {
@@ -1825,10 +1896,7 @@ a.wFootTiny{ transition:color .4s ease }
       stage.classList.add('lifted');
       /* D. Put the ring away and hand the native cursor back: .gScrim sets
          zoom-out, which is the right cursor for what a click now does. */
-      if (window.__niGalleryCursor) {
-        window.__niGalleryCursor.hide();
-        window.__niGalleryCursor.el.classList.remove('hideNative');
-      }
+      if (window.__niGalleryCursor) window.__niGalleryCursor.setEnabled(false);
       plates[i].style.zIndex = '60';
       lockScroll();
       gsap.to(card, {
@@ -1846,7 +1914,7 @@ a.wFootTiny{ transition:color .4s ease }
       card.setAttribute('aria-expanded', 'false');
       scrim.classList.remove('on');
       stage.classList.remove('lifted');
-      if (window.__niGalleryCursor) window.__niGalleryCursor.el.classList.add('hideNative');
+      if (window.__niGalleryCursor) window.__niGalleryCursor.setEnabled(true);
       unlockScroll();
       gsap.to(card, {
         x: 0, y: 0, scale: 1, rotate: PLATES[i].rot, rotateX: 0, rotateY: 0, z: 0,
@@ -1858,21 +1926,9 @@ a.wFootTiny{ transition:color .4s ease }
     /* Not overflow:hidden — on an already-scrolled page that clamps the scroll
        position and the page jumps, which drags the expanded plate off centre
        and breaks its return. Stop Lenis, swallow the raw inputs. */
-    var SCROLL_KEYS = { ArrowUp:1, ArrowDown:1, PageUp:1, PageDown:1, Home:1, End:1, ' ':1 };
-    function swallow(e) { e.preventDefault(); }
-    function swallowKeys(e) { if (SCROLL_KEYS[e.key]) e.preventDefault(); }
-    function lockScroll() {
-      if (window.__niLenis) window.__niLenis.stop();
-      addEventListener('wheel', swallow, { passive: false });
-      addEventListener('touchmove', swallow, { passive: false });
-      addEventListener('keydown', swallowKeys, { passive: false });
-    }
-    function unlockScroll() {
-      removeEventListener('wheel', swallow);
-      removeEventListener('touchmove', swallow);
-      removeEventListener('keydown', swallowKeys);
-      if (window.__niLenis) window.__niLenis.start();
-    }
+    /* lockScroll / unlockScroll are declared once at the top of this script and
+       shared by both galleries — see the chrome block. They used to live here,
+       which was fine while SALONE was the only section that expanded a plate. */
 
     cards.forEach(function (card, i) {
       card.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') paint(i); });
@@ -2145,12 +2201,19 @@ a.wFootTiny{ transition:color .4s ease }
         x:14, y:60, w:12, r:2/3, rot:-3.6, d:0.58,  mx:14, my:72, mw:34, mr:2/3 }
     ];
 
+    var EXPAND_FILL = 0.82; // share of the viewport an expanded plate targets
+
     var section = document.getElementById('lavori');
     var stage = document.getElementById('vStage');
+    var scrim = document.getElementById('vScrim');
     var titleEl = document.getElementById('vTitle');
     var ruleEl = document.getElementById('vRule');
     var kicker = document.getElementById('vKicker');
     var fine = matchMedia('(min-width: 861px) and (hover: hover)').matches;
+    var vCursor = window.__niWorksCursor;
+    /* Which plate is forward, and which is open. Two different states: on
+       touch the first tap sets `active` and the second reads it. */
+    var active = null, expanded = null;
 
     ['I NOSTRI', 'LAVORI'].forEach(function (word, li) {
       var line = document.createElement('span');
@@ -2222,6 +2285,14 @@ a.wFootTiny{ transition:color .4s ease }
     function paint(a) {
       cards.forEach(function (c, i) {
         var on = i === a;
+        /* The expanded plate's transform belongs to open(); painting it here
+           would drag it back out of the centre of the screen. Its neighbours
+           still recede, which is what the scrim sits on top of. */
+        if (i === expanded) {
+          c.classList.toggle('isOn', true);
+          c.classList.toggle('isOff', false);
+          return;
+        }
         gsap.to(c, {
           scale: on ? 1.055 : a === null ? 1 : 0.972,
           rotate: on ? 0 : WORKS[i].rot,
@@ -2243,25 +2314,97 @@ a.wFootTiny{ transition:color .4s ease }
       cards.forEach(function (card, i) {
         var box = null;
         card.addEventListener('pointerenter', function () {
-          box = card.getBoundingClientRect(); paint(i);
+          if (expanded !== null) return;
+          box = card.getBoundingClientRect(); active = i; paint(i);
         });
         card.addEventListener('pointermove', function (e) {
-          if (!box) return;
+          /* An expanded plate is under the pointer by definition — it fills the
+             screen — and tilting it while it is open would fight the
+             expansion's own transform. */
+          if (!box || expanded !== null) return;
           /* Five degrees at the corner. Enough to catch the light. */
           qx[i](((e.clientX - box.left) / box.width - 0.5) * 5);
           qy[i](-((e.clientY - box.top) / box.height - 0.5) * 5);
         });
-        card.addEventListener('pointerleave', function () { box = null; paint(null); });
+        card.addEventListener('pointerleave', function () {
+          box = null;
+          if (expanded !== null) return;
+          active = null; paint(null);
+        });
       });
     }
 
-    /* Touch: one plate active at a time, and tapping the active one lets go. */
+    /* ---- expansion ----------------------------------------------------
+       SALONE's, exactly: a plate that opens on a click, fills 82% of the
+       viewport and returns precisely to where it was. Two galleries on one
+       page that open a picture two different ways would read as two different
+       sites. Not gated on `fine` — a plate opens on a touch device too; it is
+       the pointer tilt above that is desktop-only. */
+    function open(i) {
+      if (expanded !== null) return;
+      var card = cards[i], plate = plates[i];
+      /* Two rects, two jobs. The translation comes from the card's live rect,
+         so the move starts exactly where the plate sits, hover scale and tilt
+         and all. The scale comes from the plate's untransformed box, the only
+         measurement not already multiplied by the hover transform and by
+         translateZ's perspective magnification — deriving it from the live
+         rect is what put SALONE's first expansion at 75% instead of 82%. */
+      var r = card.getBoundingClientRect(), base = plate.getBoundingClientRect();
+      var vw = innerWidth, vh = innerHeight;
+      var grow = Math.min(vw * EXPAND_FILL / base.width, vh * EXPAND_FILL / base.height);
+
+      expanded = i;
+      paint(i);
+      lockScroll();
+      plate.style.zIndex = '60';
+      stage.classList.add('vStageLifted');
+      scrim.classList.add('on');
+      card.classList.add('isExpanded');
+      card.setAttribute('aria-expanded', 'true');
+      if (vCursor) vCursor.setEnabled(false);
+
+      gsap.to(card, {
+        x: '+=' + (vw / 2 - (r.left + r.width / 2)),
+        y: '+=' + (vh / 2 - (r.top + r.height / 2)),
+        scale: grow, rotate: 0, rotateX: 0, rotateY: 0, z: 0,
+        duration: 1.05, ease: 'power3.inOut', overwrite: 'auto'
+      });
+    }
+
+    function close() {
+      if (expanded === null) return;
+      var i = expanded, card = cards[i];
+      expanded = null;
+      unlockScroll();
+      stage.classList.remove('vStageLifted');
+      scrim.classList.remove('on');
+      card.classList.remove('isExpanded');
+      card.setAttribute('aria-expanded', 'false');
+      if (vCursor) vCursor.setEnabled(true);
+      gsap.to(card, {
+        x: 0, y: 0, scale: 1, rotate: WORKS[i].rot, rotateX: 0, rotateY: 0, z: 0,
+        duration: 0.95, ease: 'power3.inOut', overwrite: 'auto',
+        onComplete: function () {
+          plates[i].style.zIndex = 10 + Math.round(WORKS[i].d * 10);
+          paint(null);
+        }
+      });
+    }
+
     cards.forEach(function (card, i) {
       card.addEventListener('click', function () {
-        if (matchMedia('(hover: hover)').matches) return;
-        paint(card.classList.contains('isOn') ? null : i);
+        if (expanded !== null) { close(); return; }
+        /* No hover on touch, so the first tap brings the plate forward and the
+           second opens it — the same two beats SALONE uses, made explicit
+           because the device cannot imply the first one. */
+        if (matchMedia('(hover: none)').matches && active !== i) {
+          active = i; paint(i); return;
+        }
+        open(i);
       });
     });
+    scrim.addEventListener('click', close);
+    addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   })();
 
 

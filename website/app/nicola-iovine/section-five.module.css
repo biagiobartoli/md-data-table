@@ -122,6 +122,12 @@
   aspect-ratio:16/8.4;
   perspective:1500px; perspective-origin:50% 45%;
 }
+/* Above the scrim while a plate is expanded, so the expanded plate is lit and
+   everything around it is not. It has to be the stage and not the plate:
+   .stage carries `perspective`, which makes it a stacking context, so a
+   z-index on a plate inside it can never climb past a sibling of .stage
+   however high it is set. Same reason as in SALONE. */
+.stageLifted{ z-index:60 }
 /* .plate is layout only and never transformed, so nothing here depends on
    measuring a moving box. */
 .plate{
@@ -157,7 +163,23 @@
   opacity:0; transform:translateY(-4px);
   transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
 }
+/* The caption sits 10px below the plate. On an expanded plate that puts it
+   below the bottom of the screen, so it goes away for the duration — the
+   photograph is the point at that size, and the name is already in the
+   button's accessible label. */
 .card.isOn .label{ opacity:1; transform:translateY(0) }
+.card.isExpanded .label{ opacity:0 }
+
+/* ---------- expansion scrim ---------- */
+/* The same ground as SALONE's, at the same value: the two galleries open the
+   same way, so they must dim the page the same amount. */
+.scrim{
+  position:fixed; inset:0; z-index:50;
+  background:rgba(5,6,7,.86);
+  opacity:0; pointer-events:none;
+  transition:opacity .8s ease;
+}
+.scrimOn{ opacity:1; pointer-events:auto; cursor:zoom-out }
 
 /* ---------- mobile ----------
    A separate arrangement: two staggered columns, no overlaps. */

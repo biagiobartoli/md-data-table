@@ -1,20 +1,35 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { useIsomorphicLayoutEffect, prefersReducedMotion } from '@/lib/motion';
+import { lockScroll, unlockScroll } from '@/lib/scrollLock';
 import { WORKS, WORKS_MOBILE, BACKGROUND, TITLE_LINES, KICKER } from './works';
 import styles from './section-five.module.css';
 import GalleryCursor from './GalleryCursor';
 
-/* Deliberately not SALONE's machinery. That section runs a cursor field over
-   the whole stage and expands a plate to the viewport; this one has no field
-   and no expansion — the plate answers its own pointer and the rest of the
-   spread quietens. Related language, different mechanism. */
+/* Deliberately not SALONE's machinery. That section runs a magnetic cursor
+   field over the whole stage and scrubs its plates in as you scroll through
+   it; this one has no field, and its spread is already hanging when you
+   arrive. Related language, different mechanism.
+
+   What the two DO share is the expansion, and share it exactly: a plate that
+   opens on a click, fills 82% of the viewport, and returns precisely to where
+   it was. Two galleries on one page that open a picture two different ways
+   would read as two different sites. So the geometry below is SALONE's, down
+   to which rect is measured for what — see the comment in open(). */
+const EXPAND_FILL = 0.82; // share of the viewport an expanded plate targets
 
 export default function SectionFive() {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  /* Interaction state lives in refs as well as state: the pointer handlers run
+     every frame and must never read a value React has not re-rendered yet. */
+  const activeRef = useRef<number | null>(null);
+  const expandedRef = useRef<number | null>(null);
+  const api = useRef<{ open(i: number): void; close(): void } | null>(null);
+  const paintRef = useRef<((a: number | null) => void) | null>(null);
 
   useIsomorphicLayoutEffect(() => {
     const reduced = prefersReducedMotion();
@@ -68,6 +83,63 @@ export default function SectionFive() {
         },
       });
 
+      /* ---- expansion ------------------------------------------------
+         Defined before the desktop-only branch below, because a plate opens on
+         a touch device too — it is the pointer *tilt* that is desktop-only. */
+      const open = (i: number) => {
+        if (expandedRef.current !== null) return;
+        const card = cards[i];
+        const plate = card.closest(`.${styles.plate}`) as HTMLElement;
+        /* Two different rects, for two different jobs — and getting this wrong
+           is what put SALONE's first expansion at 75% of the viewport when it
+           had been asked for 82%.
+           The translation comes from the card's *live* rect, so the move starts
+           exactly where the plate currently sits, hover scale and tilt and all.
+           The scale comes from the plate's own untransformed box, because that
+           is the only measurement not already multiplied by the hover transform
+           and by translateZ's perspective magnification. */
+        const r = card.getBoundingClientRect();
+        const base = plate.getBoundingClientRect();
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const grow = Math.min((vw * EXPAND_FILL) / base.width, (vh * EXPAND_FILL) / base.height);
+
+        expandedRef.current = i;
+        setExpanded(i);
+        paint(i);          // everything else recedes behind the scrim
+        lockScroll();
+        plate.style.zIndex = '60';
+        card.classList.add(styles.isExpanded);
+
+        gsap.to(card, {
+          x: `+=${vw / 2 - (r.left + r.width / 2)}`,
+          y: `+=${vh / 2 - (r.top + r.height / 2)}`,
+          scale: grow,
+          rotate: 0, rotateX: 0, rotateY: 0, z: 0,
+          duration: 1.05, ease: 'power3.inOut', overwrite: 'auto',
+        });
+      };
+
+      const close = () => {
+        const i = expandedRef.current;
+        if (i === null) return;
+        const card = cards[i];
+        expandedRef.current = null;
+        setExpanded(null);
+        unlockScroll();
+        card.classList.remove(styles.isExpanded);
+        gsap.to(card, {
+          x: 0, y: 0, scale: 1, rotate: rots[i], rotateX: 0, rotateY: 0, z: 0,
+          duration: 0.95, ease: 'power3.inOut', overwrite: 'auto',
+          onComplete: () => {
+            (card.closest(`.${styles.plate}`) as HTMLElement).style.zIndex = '';
+            paint(null);
+          },
+        });
+      };
+
+      api.current = { open, close };
+      paintRef.current = paint;
+
       if (!fine) return;
 
       /* ---- the plate answers its own pointer -------------------------
@@ -79,16 +151,29 @@ export default function SectionFive() {
 
       cards.forEach((card, i) => {
         let box: DOMRect | null = null;
-        const enter = () => { box = card.getBoundingClientRect(); paint(i); };
+        const enter = () => {
+          if (expandedRef.current !== null) return;
+          box = card.getBoundingClientRect();
+          activeRef.current = i;
+          paint(i);
+        };
         const move = (e: PointerEvent) => {
-          if (!box) return;
+          /* An expanded plate is under the pointer by definition — it fills the
+             screen — and tilting it while it is open would fight the
+             expansion's own transform. */
+          if (!box || expandedRef.current !== null) return;
           const dx = (e.clientX - box.left) / box.width - 0.5;
           const dy = (e.clientY - box.top) / box.height - 0.5;
           /* Five degrees at the corner. Enough to catch the light. */
           quickX[i](dx * 5);
           quickY[i](-dy * 5);
         };
-        const leave = () => { box = null; paint(null); };
+        const leave = () => {
+          box = null;
+          if (expandedRef.current !== null) return;
+          activeRef.current = null;
+          paint(null);
+        };
         card.addEventListener('pointerenter', enter);
         card.addEventListener('pointermove', move);
         card.addEventListener('pointerleave', leave);
@@ -104,6 +189,14 @@ export default function SectionFive() {
       function paint(a: number | null) {
         cards.forEach((c, i) => {
           const on = i === a;
+          /* The expanded plate's transform belongs to open(); painting it here
+             would drag it back out of the centre of the screen. Its neighbours
+             still recede, which is what the scrim sits on top of. */
+          if (i === expandedRef.current) {
+            c.classList.toggle(styles.isOn, true);
+            c.classList.toggle(styles.isOff, false);
+            return;
+          }
           gsap.to(c, {
             scale: on ? 1.055 : a === null ? 1 : 0.972,
             rotate: on ? 0 : rots[i],
@@ -119,24 +212,37 @@ export default function SectionFive() {
       }
     }, root);
 
-    return () => { ctx.revert(); ScrollTrigger.refresh(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') api.current?.close(); };
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      /* Unmounting mid-expansion would otherwise leave the page unable to
+         scroll, with nothing left on screen to explain why. */
+      if (expandedRef.current !== null) unlockScroll();
+      expandedRef.current = null;
+      activeRef.current = null;
+      api.current = null;
+      paintRef.current = null;
+      ctx.revert();
+      ScrollTrigger.refresh();
+    };
   }, []);
 
-  /* Touch: one plate active at a time, and tapping the active one lets go. */
-  const onTap = (i: number, el: HTMLElement) => {
-    if (window.matchMedia('(hover: hover)').matches) return;
-    const all = Array.from(
-      el.closest(`.${styles.stage}`)!.querySelectorAll<HTMLElement>(`.${styles.card}`),
-    );
-    const already = el.classList.contains(styles.isOn);
-    all.forEach((c) => {
-      c.classList.remove(styles.isOn, styles.isOff);
-      (c.closest(`.${styles.plate}`) as HTMLElement).style.zIndex = '';
-    });
-    if (already) return;
-    all.forEach((c) => c !== el && c.classList.add(styles.isOff));
-    el.classList.add(styles.isOn);
-    (el.closest(`.${styles.plate}`) as HTMLElement).style.zIndex = '40';
+  /* One handler for both input models, and the same two-step SALONE uses. On a
+     pointer device the plate is already active by the time it is clicked, so a
+     click expands it. On touch there is no hover, so the first tap brings the
+     plate forward and the second opens it — the same two beats, just made
+     explicit because the device cannot imply the first one. */
+  const onPlateClick = (i: number) => {
+    if (expandedRef.current !== null) { api.current?.close(); return; }
+    const coarse = window.matchMedia('(hover: none)').matches;
+    if (coarse && activeRef.current !== i) {
+      activeRef.current = i;
+      paintRef.current?.(i);
+      return;
+    }
+    api.current?.open(i);
   };
 
   return (
@@ -157,6 +263,12 @@ export default function SectionFive() {
       </div>
       <div className={styles.atmos} aria-hidden="true" />
 
+      <div
+        className={`${styles.scrim} ${expanded !== null ? styles.scrimOn : ''}`}
+        aria-hidden="true"
+        onClick={() => api.current?.close()}
+      />
+
       <header className={styles.head}>
         <span className={styles.eyebrow}>05 — Lavori</span>
         <h2 className={styles.title} aria-label={TITLE_LINES.join(' ')}>
@@ -174,7 +286,11 @@ export default function SectionFive() {
         <p className={styles.kicker}>{KICKER}</p>
       </header>
 
-      <div className={styles.stage} ref={stage}>
+      {/* Lifted over the scrim while a plate is expanded — see .stageLifted. */}
+      <div
+        className={`${styles.stage} ${expanded !== null ? styles.stageLifted : ''}`}
+        ref={stage}
+      >
         {WORKS.map((w, i) => {
           const m = WORKS_MOBILE[i];
           return (
@@ -194,7 +310,8 @@ export default function SectionFive() {
                   type="button"
                   className={styles.card}
                   aria-label={w.alt}
-                  onClick={(e) => onTap(i, e.currentTarget)}
+                  aria-expanded={expanded === i}
+                  onClick={() => onPlateClick(i)}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={`/ni/works/${w.src}.webp`} alt="" loading="lazy" decoding="async" />
@@ -204,8 +321,12 @@ export default function SectionFive() {
             </figure>
           );
         })}
-        {/* D. No label: see .cursorBare — nothing here opens on a click. */}
-        <GalleryCursor />
+        {/* D. These plates open now, so the ring carries the same word SALONE's
+            does — the two galleries behave identically, so they should say the
+            same thing. Unmounted while a plate is open, which hands the native
+            cursor back: .scrim sets zoom-out there, which is what a click now
+            does. */}
+        {expanded === null && <GalleryCursor label="Apri" />}
       </div>
     </section>
   );

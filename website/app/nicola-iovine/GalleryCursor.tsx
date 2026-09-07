@@ -55,19 +55,41 @@ export default function GalleryCursor({ label }: { label?: string }) {
       const toX = gsap.quickTo(ring, 'x', { duration: 0.18, ease: 'power3' });
       const toY = gsap.quickTo(ring, 'y', { duration: 0.18, ease: 'power3' });
 
+      let shown = false;
+      const show = (e: PointerEvent) => {
+        if (shown) return;
+        shown = true;
+        // Place it before it appears, or it fades in at the last position.
+        const r = el.getBoundingClientRect();
+        gsap.set(ring, { x: e.clientX - r.left, y: e.clientY - r.top });
+        /* overwrite, on both of these. A click that arrives in the same gesture
+           that revealed the ring starts a 0.32s fade-in and then, from the
+           expansion, a 0.25s fade-out — and with GSAP's default they both run,
+           so the fade-IN finishes last and the ring is left fully visible over
+           the scrim. The later call has to kill the earlier one. */
+        gsap.to(ring, {
+          autoAlpha: 1, scale: 1, duration: 0.32, ease: 'power2.out', overwrite: 'auto',
+        });
+      };
+      const hide = () => {
+        shown = false;
+        gsap.to(ring, {
+          autoAlpha: 0, scale: 0.6, duration: 0.25, ease: 'power2.in', overwrite: 'auto',
+        });
+      };
       const onMove = (e: PointerEvent) => {
+        /* A move reveals the ring as well as steering it, and pointerenter is
+           only an optimisation on top of that. It has to work this way: both
+           galleries unmount this component while a plate is expanded, so it
+           remounts with the pointer already inside the stage — and
+           pointerenter cannot fire for a pointer that never left. Revealing on
+           enter alone left the ring invisible after every close, until you
+           moved the mouse out of the gallery and back in. */
+        show(e);
         const r = el.getBoundingClientRect();
         toX(e.clientX - r.left);
         toY(e.clientY - r.top);
       };
-      const show = (e: PointerEvent) => {
-        // Place it before it appears, or it fades in at the last position.
-        const r = el.getBoundingClientRect();
-        gsap.set(ring, { x: e.clientX - r.left, y: e.clientY - r.top });
-        gsap.to(ring, { autoAlpha: 1, scale: 1, duration: 0.32, ease: 'power2.out' });
-      };
-      const hide = () =>
-        gsap.to(ring, { autoAlpha: 0, scale: 0.6, duration: 0.25, ease: 'power2.in' });
 
       el.addEventListener('pointermove', onMove);
       el.addEventListener('pointerenter', show);
