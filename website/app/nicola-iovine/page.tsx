@@ -5,6 +5,7 @@ import Scene from './Scene';
 import SectionThree from './SectionThree';
 import SectionFour from './SectionFour';
 import SectionFive from './SectionFive';
+import Brands from './Brands';
 import SectionSix from './SectionSix';
 import styles from './hero.module.css';
 
@@ -34,6 +35,7 @@ export default function Page() {
       <SectionThree />
       <SectionFour />
       <SectionFive />
+      <Brands />
       <SectionSix />
     </div>
   );

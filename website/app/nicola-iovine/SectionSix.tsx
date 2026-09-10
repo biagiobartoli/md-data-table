@@ -181,7 +181,7 @@ export default function SectionSix() {
         <div className={styles.top}>
           {/* ---- left: the ask ---- */}
           <div className={styles.ask}>
-            <span className={`${styles.eyebrow} ${styles.reveal}`}>06 — Contatti</span>
+            <span className={`${styles.eyebrow} ${styles.reveal}`}>07 — Contatti</span>
             <h2 className={styles.title} aria-label={TITLE_LINES.join(' ')}>
               {TITLE_LINES.map((line, li) => (
                 <span className={styles.line} key={li}>

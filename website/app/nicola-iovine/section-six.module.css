@@ -32,9 +32,9 @@
 .six::before{
   content:''; position:absolute; top:0; left:0; right:0; z-index:1;
   height:clamp(80px,11vh,170px); pointer-events:none;
-  /* from section five's warm ground. No bridge at the foot: the page ends
+  /* from the brands section's ground. No bridge at the foot: the page ends
      here, and there is nothing on the other side to hand off to. */
-  background:linear-gradient(180deg,#0A0705 0%,rgba(10,7,5,0) 100%);
+  background:linear-gradient(180deg,#040405 0%,rgba(4,4,5,0) 100%);
 }
 .atmos{
   position:absolute; inset:0; z-index:0; pointer-events:none;

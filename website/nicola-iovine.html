@@ -344,13 +344,14 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
    the p99 of ordinary content edges in the same frame. z-index sits above each
    section's background layers and below its content. */
 .three::before,.three::after,.four::before,.four::after,
-.five::before,.five::after,.six::before{
+.five::before,.five::after,.brands::before,.brands::after,.six::before{
   content:''; position:absolute; left:0; right:0;
   height:clamp(80px,11vh,170px); pointer-events:none;
 }
 .three::before,.three::after{ z-index:1 }
 .four::before,.four::after{ z-index:6 }
 .five::before,.five::after{ z-index:2 }
+.brands::before,.brands::after{ z-index:1 }
 .six::before{ z-index:1 }
 .three::before{ top:0; background:linear-gradient(180deg,#050505 0%,rgba(5,5,5,0) 100%) }
 .three::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
@@ -360,9 +361,184 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
    horizontal edge four or five times a minute */
 .four::after{ bottom:0; background:linear-gradient(0deg,#0A0705 0%,rgba(10,7,5,0) 100%) }
 .five::before{ top:0; background:linear-gradient(180deg,#050505 0%,rgba(5,5,5,0) 100%) }
-.five::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
+/* into the brands section's ground */
+.five::after{ bottom:0; background:linear-gradient(0deg,#040405 0%,rgba(4,4,5,0) 100%) }
+/* from section five's warm ground, into section six's */
+.brands::before{ top:0; background:linear-gradient(180deg,#0A0705 0%,rgba(10,7,5,0) 100%) }
+.brands::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
 /* No bridge at the foot of six: the page ends there. */
-.six::before{ top:0; background:linear-gradient(180deg,#0A0705 0%,rgba(10,7,5,0) 100%) }
+.six::before{ top:0; background:linear-gradient(180deg,#040405 0%,rgba(4,4,5,0) 100%) }
+
+/* ===== the brands section — I PRODOTTI CON CUI LAVORIAMO ==================
+   A port of app/nicola-iovine/Brands.tsx.
+
+   The quietest section on the page, deliberately. It sits between the
+   portfolio and the booking block, where the reader has just been shown a lot
+   of photographs and is about to be asked to do something — so it is almost
+   entirely empty, and its whole job is to name two houses well.
+
+   THE LOGO FILES ARE NOT IN THE PROJECT YET. The brief asked for the exact
+   uploaded brand marks cropped out of their screenshots; those never arrived,
+   and a re-set approximation of somebody else's trademark is not a
+   placeholder, it is a wrong logo. Each brand renders its NAME until its file
+   exists — see BRANDS in the script below, and scripts/brand-logos.py.
+   ========================================================================= */
+.brands{
+  position:relative;
+  /* Between section five's warm #0A0705 and section six's #050505, and a touch
+     deeper than either: after the bench photograph, an empty near-black is what
+     makes the two marks the only thing in the frame. */
+  background:#040405;
+  color:#A9ADB2;
+  padding:clamp(90px,15vh,190px) clamp(20px,5vw,84px) clamp(96px,15vh,180px);
+  overflow:hidden; isolation:isolate;
+}
+/* A single cool wash, low and wide, so the emptiness has a temperature rather
+   than being flat black. No vignette: the section is already dark at the edges
+   and a second darkening only makes it muddy. */
+.pAtmos{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(78% 52% at 50% 32%, rgba(111,159,163,.052) 0%, rgba(4,4,5,0) 72%),
+    radial-gradient(52% 40% at 50% 96%, rgba(169,173,178,.03) 0%, rgba(4,4,5,0) 70%);
+}
+.pInner{ position:relative; z-index:2; width:min(1320px,100%); margin:0 auto }
+
+.pHead{ padding-bottom:clamp(46px,7vh,96px) }
+.pEyebrow{
+  display:block; font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase; color:#7E9799;
+  margin:0 0 clamp(14px,2vh,24px);
+}
+.pTitle{
+  margin:0; font-family:var(--ni-display),"Times New Roman",serif; font-weight:300;
+  /* A shorter measure than section five's: this title is 26 characters against
+     that one's 15, and at 8.6vw the second line would run the full width of the
+     page and stop being a masthead. */
+  font-size:clamp(2.1rem,6.2vw,5.4rem);
+  line-height:.96; letter-spacing:-.004em; color:#DEE2E4;
+}
+.pLine{ display:flex; perspective:900px }
+/* The second line steps in, as in I NOSTRI LAVORI — a flush-left two-liner
+   reads as a paragraph, the indent is what makes it read as a masthead. */
+.pLineTwo{ padding-left:clamp(24px,6vw,124px) }
+/* flex:0 0 auto is load-bearing. .pLine is a flex row, so without it every
+   letter box is a shrinkable flex item: when the line is wider than the column
+   the browser squeezes all of them, and since each mask is overflow:hidden for
+   the reveal, the squeeze CLIPS the glyph inside it rather than overflowing.
+   Completely silent — the line reports as fitting, the page reports no
+   overflow, and every letter is quietly missing its right edge. This title's
+   second line is 17 characters and was losing 47px of glyph across them on
+   every phone. */
+.pMask{ display:block; flex:0 0 auto; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.pCh{ display:block; will-change:transform; white-space:pre }
+.pRule{
+  display:block; margin:clamp(20px,2.8vh,34px) 0 0;
+  width:clamp(56px,7vw,124px); height:1px;
+  background:linear-gradient(90deg, rgba(111,159,163,.75), rgba(169,173,178,.18), transparent);
+  transform:scaleX(0); transform-origin:left center; will-change:transform,opacity;
+}
+
+/* Two equal columns and a hairline, and the hairline is a grid track rather
+   than a border on either side — a border belongs to one half and would move
+   with it under hover; a track belongs to neither. */
+.pSplit{
+  position:relative; display:grid;
+  grid-template-columns:1fr 1px 1fr; align-items:stretch;
+  list-style:none; margin:0; padding:0;
+}
+.pHalf{
+  position:relative; display:grid; place-items:center;
+  /* Tall enough that the mark is surrounded rather than fitted. On a section
+     this empty the space IS the design. */
+  min-height:clamp(220px,34vh,340px);
+  padding:clamp(34px,6vh,72px) clamp(20px,4vw,64px);
+  background:radial-gradient(62% 58% at 50% 50%, rgba(150,170,175,0) 0%, rgba(4,4,5,0) 70%);
+  transition:background .7s ease; will-change:transform,opacity;
+}
+.pDivider{
+  /* Drawn from the centre outwards on entrance, so the two halves are divided
+     rather than arriving already separate. */
+  width:1px; align-self:stretch;
+  background:linear-gradient(180deg, rgba(169,173,178,0) 0%, rgba(169,173,178,.16) 22%,
+    rgba(169,173,178,.16) 78%, rgba(169,173,178,0) 100%);
+  transform:scaleY(0); transform-origin:center; will-change:transform;
+}
+
+/* Two elements, because two things want to own one mark and must not fight
+   over the same properties: .pMark is the resting state and the pointer
+   parallax (CSS only), .pMarkIn is the entrance (GSAP only). Collapsed into
+   one, the entrance's inline opacity:1 wins over the resting 0.78 and stays
+   there, so hover has nowhere left to go. */
+.pMark{
+  display:flex; align-items:center; justify-content:center;
+  width:var(--markW); max-width:100%;
+  /* C. The pointer field, at the smallest amplitude on the page. The marks are
+     the only objects in a very empty frame, so a few pixels of drift is the
+     difference between "flat" and "lit"; any more and it becomes a toy. */
+  transform:translate3d(calc(var(--ni-px,0) * 4px), calc(var(--ni-py,0) * 4px), 0);
+  transition:opacity .7s ease;
+  opacity:.78;   /* one stop below white, so hover has somewhere to go */
+}
+.pMarkIn{ display:block; width:100%; will-change:transform,opacity }
+.pMark img{ display:block; width:100%; height:auto }
+/* The name, shown until the mark's file exists. Set in the UI face and widely
+   tracked so it reads as a brand NAME and never as an attempt at the brand's
+   own logo, which would be worse than showing nothing. */
+.pWordmark{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:clamp(11px,1.15vw,14px);
+  letter-spacing:.44em; text-transform:uppercase; font-weight:400;
+  color:#C6CBCE; text-align:center;
+  padding-left:.44em;   /* the tracking is applied after the last letter too */
+  white-space:nowrap;
+}
+
+/* Desktop only, and deliberately almost nothing: the mark comes up to full
+   strength and the ground under it warms by a few per cent. No scale, no
+   border, no shadow — at this size any of those reads as a card. */
+@media (hover:hover) and (pointer:fine){
+  .pHalf:hover{
+    background:radial-gradient(62% 58% at 50% 50%, rgba(150,170,175,.055) 0%, rgba(4,4,5,0) 70%);
+  }
+  .pHalf:hover .pMark{ opacity:1 }
+  /* The other half steps back, so hovering one is a choice rather than a
+     highlight — the same idea as a gallery plate receding. */
+  .pSplit:hover .pHalf:not(:hover) .pMark{ opacity:.5 }
+}
+.pHalf:focus-within .pMark{ opacity:1 }
+
+/* Stacked, and the divider turns with them: a vertical hairline between two
+   stacked panels would be a line down the middle of nothing. */
+@media (max-width:860px){
+  .brands{ padding:clamp(70px,10vh,110px) 20px clamp(76px,11vh,120px) }
+  .pHead{ padding-bottom:clamp(34px,5vh,56px) }
+  /* 8vw, not 9.4: CON CUI LAVORIAMO is 17 characters and has to fit the column
+     at its natural width now that the letters cannot be squeezed. Measured; it
+     clears by 5% at 375px, the tightest of the three target widths. */
+  .pTitle{ font-size:clamp(1.6rem,8vw,3.2rem) }
+  .pLineTwo{ padding-left:clamp(12px,5vw,40px) }
+  .pRule{ width:clamp(40px,13vw,70px) }
+  .pSplit{ grid-template-columns:1fr; grid-template-rows:1fr 1px 1fr }
+  .pHalf{ min-height:clamp(150px,22vh,210px); padding:clamp(28px,5vh,44px) 12px }
+  .pDivider{
+    width:auto; height:1px; justify-self:stretch;
+    background:linear-gradient(90deg, rgba(169,173,178,0) 0%, rgba(169,173,178,.16) 22%,
+      rgba(169,173,178,.16) 78%, rgba(169,173,178,0) 100%);
+    transform:scaleX(0);
+  }
+  /* No hover on a phone, so the marks rest at full strength — the resting
+     dimness only exists to give hover somewhere to go. */
+  .pMark{ opacity:.92; transform:none }
+  .pWordmark{ font-size:clamp(10px,3vw,12px); letter-spacing:.36em }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .pHalf,.pMark{ transition:none }
+  .pMark{ transform:none }
+  /* The entrance is skipped, so the divider has to be drawn already. */
+  .pDivider{ transform:none }
+}
 
 /* ===== section three — SALONE ============================================
    A stage with a giant typographic layer behind hand-placed photographic
@@ -696,7 +872,12 @@ body{background:var(--ink);color:var(--silver);overflow-x:hidden;-webkit-font-sm
 /* The second line steps in: a flush-left two-liner reads as a paragraph, the
    indent is what makes it read as a masthead. */
 .vLineTwo{ padding-left:clamp(28px,7vw,148px) }
-.vMask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+/* flex:0 0 auto: .vLine is a flex row, and a letter mask that is allowed to
+   shrink gets its glyph clipped rather than overflowed, because the mask is
+   overflow:hidden for the reveal. Silent — nothing reports an overflow. This
+   title has never shrunk (laid width equals natural width at every viewport),
+   but the failure mode is invisible and one longer word would trigger it. */
+.vMask{ display:block; flex:0 0 auto; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
 .vCh{ display:block; will-change:transform; white-space:pre }
 .vRule{
   display:block; margin:clamp(20px,2.8vh,34px) 0 0;
@@ -1270,6 +1451,24 @@ a.wFootTiny{ transition:color .4s ease }
 </section>
 
 
+<section class="brands" id="prodotti" aria-label="I prodotti con cui lavoriamo">
+  <div class="pAtmos" aria-hidden="true"></div>
+  <div class="pInner">
+    <header class="pHead">
+      <span class="pEyebrow">06 — Prodotti</span>
+      <h2 class="pTitle" id="pTitle" aria-label="I PRODOTTI CON CUI LAVORIAMO"></h2>
+      <span class="pRule" id="pRule" aria-hidden="true"></span>
+    </header>
+    <!-- A list, because that is what it is: the houses this salon works with.
+         The hairline between them is a grid track and not a border, so it
+         belongs to neither half and cannot move with one. -->
+    <ul class="pSplit" id="pSplit">
+      <!-- halves built in the script -->
+    </ul>
+  </div>
+</section>
+
+
 <section class="six" id="contatti" aria-label="Contatti e prenotazioni">
   <div class="wAtmos" aria-hidden="true"></div>
   <!-- I. The wordmark behind the footer. It used to read CHIAVARI; the brief
@@ -1279,7 +1478,7 @@ a.wFootTiny{ transition:color .4s ease }
   <div class="wInner">
     <div class="wTop">
       <div class="wAsk">
-        <span class="wEyebrow wReveal">06 — Contatti</span>
+        <span class="wEyebrow wReveal">07 — Contatti</span>
         <h2 class="wTitle" id="wTitle" aria-label="PRENOTA IL TUO APPUNTAMENTO"></h2>
         <div class="wActions wReveal">
           <a class="wCta" id="wCta" href="#" target="_blank" rel="noopener noreferrer">
@@ -1574,6 +1773,23 @@ a.wFootTiny{ transition:color .4s ease }
     gsap.ticker.lagSmoothing(0);
   }
 
+  /* ---------------------------------------------------------------------
+     The hero and the pinned scene, in their own scope.
+
+     The scope is the point. This block bails out early under reduced motion —
+     it sets the hero's finished state and stops, because there is no entrance
+     and no pin to build. That `return` used to sit at the top level of this
+     script, where it did not stop the hero: it stopped EVERYTHING after it.
+     Sections three, four, five, six and the brands section all build their own
+     DOM from data, and all of them are declared below this point, so a visitor
+     with prefers-reduced-motion got a gallery with no plates, a treatments
+     list with no rows, a portfolio with no work, and a contact section with no
+     address, no hours, no reviews and no footer — silently, with no console
+     error, because nothing had thrown. Wrapped, the early return means what it
+     says: skip the hero's motion, not the page.
+     --------------------------------------------------------------------- */
+  (function () {
+
   /* CSS starts the glyphs at translateY(102%), but getComputedStyle reports a
      matrix in pixels — GSAP reads that as y:146px / yPercent:0, so tweening
      yPercent would be a no-op. Normalise into GSAP's own model first. */
@@ -1715,6 +1931,7 @@ a.wFootTiny{ transition:color .4s ease }
                        { scale: 1, yPercent: 2.2, duration: 140, ease: 'none' }, 40);
 
   if (!mobile) tl.to('#ni-dust-warp', { attr: { scale: 26 }, duration: 66 }, 25);
+  })();
 
 
   /* =====================================================================
@@ -2407,6 +2624,131 @@ a.wFootTiny{ transition:color .4s ease }
     addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   })();
 
+
+
+  /* =====================================================================
+     THE BRANDS SECTION — I PRODOTTI CON CUI LAVORIAMO
+     A port of app/nicola-iovine/Brands.tsx.
+
+     THE LOGO FILES ARE NOT IN THE PROJECT YET. The brief asked for the exact
+     uploaded brand marks, cropped out of their screenshots; those never
+     arrived, and a re-set approximation of somebody else's trademark is not a
+     placeholder, it is a wrong logo. So each brand renders its NAME until its
+     file exists. To finish the section, run
+
+         python3 scripts/brand-logos.py <kevin-murphy.png> <nak-hair.png>
+
+     and set `logo` below to the path it prints. Nothing else changes — not the
+     layout, not the animation, not the hover.
+     ===================================================================== */
+  (function () {
+    var BRANDS = [
+      { id:'kevin-murphy', name:'Kevin Murphy', logo:null, alt:'Kevin Murphy',
+        /* The K-over-wordmark lockup is close to square, so it is sized by a
+           narrower box than a wordmark would be. */
+        width:'clamp(150px,15vw,232px)' },
+      { id:'nak-hair', name:'Nak Hair', logo:null, alt:'Nak Hair Australia',
+        /* A wide, short wordmark. Given more width so the two read as the same
+           weight on the page rather than the same number of pixels. */
+        width:'clamp(190px,19vw,300px)' }
+    ];
+    var TITLE_LINES = ['I PRODOTTI', 'CON CUI LAVORIAMO'];
+
+    var section = document.getElementById('prodotti');
+    var titleEl = document.getElementById('pTitle');
+    var ruleEl = document.getElementById('pRule');
+    var split = document.getElementById('pSplit');
+
+    TITLE_LINES.forEach(function (word, li) {
+      var line = document.createElement('span');
+      line.className = 'pLine' + (li === 1 ? ' pLineTwo' : '');
+      word.split('').forEach(function (c) {
+        var m = document.createElement('span'); m.className = 'pMask';
+        m.setAttribute('aria-hidden', 'true');
+        var ch = document.createElement('span'); ch.className = 'pCh';
+        ch.textContent = c === ' ' ? ' ' : c;
+        m.appendChild(ch); line.appendChild(m);
+      });
+      titleEl.appendChild(line);
+    });
+
+    function half(brand) {
+      var li = document.createElement('li'); li.className = 'pHalf';
+      var mark = document.createElement('span'); mark.className = 'pMark';
+      mark.style.setProperty('--markW', brand.width);
+      var inner = document.createElement('span'); inner.className = 'pMarkIn';
+      /* Falls back to the name if the file is missing or fails to decode. Not
+         only for today: a 404 on a third-party logo would otherwise leave an
+         empty half with a broken-image glyph in the middle of it, which is the
+         worst thing this section could show. */
+      if (brand.logo) {
+        var img = document.createElement('img');
+        img.src = brand.logo; img.alt = brand.alt;
+        img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('error', function () {
+          inner.innerHTML = '';
+          var w = document.createElement('span');
+          w.className = 'pWordmark'; w.textContent = brand.name;
+          inner.appendChild(w);
+        });
+        inner.appendChild(img);
+      } else {
+        var w = document.createElement('span');
+        w.className = 'pWordmark'; w.textContent = brand.name;
+        inner.appendChild(w);
+      }
+      mark.appendChild(inner); li.appendChild(mark);
+      return li;
+    }
+
+    var divider = document.createElement('li');
+    divider.className = 'pDivider'; divider.setAttribute('aria-hidden', 'true');
+    split.appendChild(half(BRANDS[0]));
+    split.appendChild(divider);
+    split.appendChild(half(BRANDS[1]));
+
+    var chars = [].slice.call(titleEl.querySelectorAll('.pCh'));
+    var halves = [].slice.call(split.querySelectorAll('.pHalf'));
+    var marks = [].slice.call(split.querySelectorAll('.pMarkIn'));
+
+    /* ---- start states ---- */
+    gsap.set(chars, { yPercent: 116 });
+    gsap.set(halves, { opacity: 0, y: 26 });
+    /* The marks start slightly small as well as low. Not a bounce and not a
+       zoom — 0.96 to 1 over a second reads as settling into focus, which is
+       the one thing a logo is allowed to do. */
+    gsap.set(marks, { opacity: 0, y: 16, scale: 0.96 });
+
+    if (reduced) {
+      gsap.set(chars, { yPercent: 0 });
+      gsap.set(ruleEl, { scaleX: 1 });
+      gsap.set(halves, { opacity: 1, y: 0 });
+      gsap.set(marks, { opacity: 1, y: 0, scale: 1 });
+    } else {
+      /* Three beats, in the order the brief asked for: the title, then the
+         halves and the line that divides them, then the marks. They overlap
+         rather than queue — each starts while the one before is still easing
+         out, which is what keeps a three-part entrance from feeling like a
+         list being read aloud. */
+      ScrollTrigger.create({
+        trigger: section, start: 'top 76%', once: true,
+        onEnter: function () {
+          gsap.timeline({ defaults: { ease: 'power3.out' } })
+            .to(chars, { yPercent: 0, duration: 1.2, stagger: 0.035 }, 0)
+            .to(ruleEl, { scaleX: 1, duration: 1, ease: 'power2.inOut' }, 0.55)
+            /* Drawn from the centre out, so the two halves are divided rather
+               than arriving already separate. */
+            .to(divider, { scaleY: 1, scaleX: 1, duration: 1.1, ease: 'power2.inOut' }, 0.72)
+            .to(halves, { opacity: 1, y: 0, duration: 1.1, stagger: 0.12,
+                          /* Hand the transform back to CSS: an inline transform
+                             left by GSAP beats the :hover rule. */
+                          clearProps: 'transform' }, 0.78)
+            .to(marks, { opacity: 1, y: 0, scale: 1, duration: 1.25, stagger: 0.14,
+                         clearProps: 'transform' }, 1.05);
+        }
+      });
+    }
+  })();
 
   /* =====================================================================
      SECTION SIX — CONTATTI, RECENSIONI, FOOTER

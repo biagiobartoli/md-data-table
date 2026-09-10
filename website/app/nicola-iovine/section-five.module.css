@@ -35,8 +35,8 @@
 }
 /* from section four's ground */
 .five::before{ top:0; background:linear-gradient(180deg,#050505 0%,rgba(5,5,5,0) 100%) }
-/* into section six's */
-.five::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
+/* into the brands section's ground */
+.five::after{ bottom:0; background:linear-gradient(0deg,#040405 0%,rgba(4,4,5,0) 100%) }
 
 /* ---------- the bench ---------- */
 .bg{ position:absolute; inset:0; z-index:0; overflow:hidden }
@@ -98,7 +98,13 @@
 /* The second line steps in. A flush-left two-liner reads as a paragraph; the
    indent is what makes it read as a masthead. */
 .lineTwo{ padding-left:clamp(28px,7vw,148px) }
-.mask{ display:block; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+/* flex:0 0 auto: .line is a flex row, and a letter mask that is allowed to
+   shrink gets its glyph clipped rather than overflowed, because the mask is
+   overflow:hidden for the reveal. It is silent — nothing reports an overflow.
+   This title is short enough that it has never shrunk (measured: laid width
+   equals natural width at every viewport, so this rule changes nothing today),
+   but the failure mode is invisible and one longer word would trigger it. */
+.mask{ display:block; flex:0 0 auto; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
 .ch{ display:block; will-change:transform; white-space:pre }
 .rule{
   display:block; margin:clamp(20px,2.8vh,34px) 0 0;

@@ -1,0 +1,217 @@
+/* ---------------------------------------------------------------------------
+   I PRODOTTI CON CUI LAVORIAMO.
+
+   The quietest section on the page, deliberately. It sits between the
+   portfolio and the booking block, where the reader has just been shown a lot
+   of photographs and is about to be asked to do something — so this one is
+   almost entirely empty, and its whole job is to name two houses well.
+
+   Everything here is borrowed from sections already built: the heading is
+   section five's two-line masked reveal with the second line stepped in, the
+   index label is the same run of six, the rule is the same hairline, and the
+   pointer field is the one PageChrome publishes.
+--------------------------------------------------------------------------- */
+
+.brands{
+  position:relative;
+  /* Between section five's warm #0A0705 and section six's #050505, and a
+     touch deeper than either: after the bench photograph, an empty near-black
+     is what makes the two marks the only thing in the frame. */
+  background:#040405;
+  color:#A9ADB2;
+  padding:clamp(90px,15vh,190px) clamp(20px,5vw,84px) clamp(96px,15vh,180px);
+  overflow:hidden;
+  isolation:isolate;
+}
+
+/* ---------- the joins ---------- */
+/* Same crossfades as everywhere else: a bridge at the top in the colour of the
+   section above and one at the foot in the colour of the section below. */
+.brands::before,.brands::after{
+  content:''; position:absolute; left:0; right:0; z-index:1;
+  height:clamp(80px,11vh,170px); pointer-events:none;
+}
+/* from section five's warm ground */
+.brands::before{ top:0; background:linear-gradient(180deg,#0A0705 0%,rgba(10,7,5,0) 100%) }
+/* into section six's */
+.brands::after{ bottom:0; background:linear-gradient(0deg,#050505 0%,rgba(5,5,5,0) 100%) }
+
+/* A single cool wash, low and wide, so the emptiness has a temperature rather
+   than being flat black. No vignette: the section is already dark at the edges
+   and a second darkening only makes it muddy. */
+.atmos{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(78% 52% at 50% 32%, rgba(111,159,163,.052) 0%, rgba(4,4,5,0) 72%),
+    radial-gradient(52% 40% at 50% 96%, rgba(169,173,178,.03) 0%, rgba(4,4,5,0) 70%);
+}
+
+.inner{ position:relative; z-index:2; width:min(1320px,100%); margin:0 auto }
+
+/* ---------- heading ---------- */
+.head{ padding-bottom:clamp(46px,7vh,96px) }
+.eyebrow{
+  display:block;
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:9.5px; letter-spacing:.42em; text-transform:uppercase;
+  color:#7E9799;
+  margin:0 0 clamp(14px,2vh,24px);
+}
+.title{
+  margin:0;
+  font-family:var(--ni-display),"Times New Roman",serif;
+  font-weight:300;
+  /* A shorter measure than section five's: this title is 26 characters against
+     that one's 15, and at 8.6vw the second line would run the full width of the
+     page and stop being a masthead. */
+  font-size:clamp(2.1rem,6.2vw,5.4rem);
+  line-height:.96; letter-spacing:-.004em;
+  color:#DEE2E4;
+}
+.line{ display:flex; perspective:900px }
+/* The second line steps in, as in I NOSTRI LAVORI — a flush-left two-liner
+   reads as a paragraph, the indent is what makes it read as a masthead. */
+.lineTwo{ padding-left:clamp(24px,6vw,124px) }
+/* flex:0 0 auto is load-bearing, not tidiness. .line is a flex row, so without
+   it every letter box is a shrinkable flex item: when the line is wider than
+   the column the browser squeezes all of them, and since each mask is
+   overflow:hidden for the reveal, the squeeze CLIPS the glyph inside it rather
+   than overflowing. It is completely silent — the line reports as fitting, the
+   page reports no overflow, and every letter is quietly missing its right
+   edge. This title's second line is 17 characters and was losing 47px of glyph
+   across them on every phone. Now the letters hold their width, and a title
+   that does not fit is a visible problem instead of an invisible one. */
+.mask{ display:block; flex:0 0 auto; overflow:hidden; padding-bottom:.1em; margin-bottom:-.1em }
+.ch{ display:block; will-change:transform; white-space:pre }
+.rule{
+  display:block; margin:clamp(20px,2.8vh,34px) 0 0;
+  width:clamp(56px,7vw,124px); height:1px;
+  background:linear-gradient(90deg, rgba(111,159,163,.75), rgba(169,173,178,.18), transparent);
+  will-change:transform,opacity;
+}
+
+/* ---------- the two halves ---------- */
+/* Two equal columns and a hairline, and the hairline is a grid track rather
+   than a border on either side — a border belongs to one half and would move
+   with it under hover; a track belongs to neither. */
+.split{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1px 1fr;
+  align-items:stretch;
+}
+.half{
+  position:relative;
+  display:grid; place-items:center;
+  /* Tall enough that the mark is surrounded rather than fitted. The brief asked
+     for breathing room, and on a section this empty the space IS the design. */
+  min-height:clamp(220px,34vh,340px);
+  padding:clamp(34px,6vh,72px) clamp(20px,4vw,64px);
+  /* The hover wash lives here rather than on a child, so it covers the full
+     half including the space around the mark. */
+  background:radial-gradient(62% 58% at 50% 50%, rgba(150,170,175,0) 0%, rgba(4,4,5,0) 70%);
+  transition:background .7s ease;
+  will-change:transform,opacity;
+}
+.divider{
+  /* Drawn from the centre outwards on entrance, so the two halves are divided
+     rather than arriving already separate. */
+  width:1px; align-self:stretch;
+  background:linear-gradient(180deg,
+    rgba(169,173,178,0) 0%,
+    rgba(169,173,178,.16) 22%,
+    rgba(169,173,178,.16) 78%,
+    rgba(169,173,178,0) 100%);
+  transform:scaleY(0); transform-origin:center;
+  will-change:transform;
+}
+
+/* ---------- the marks ---------- */
+/* Two elements, because two things want to own this one mark and they must not
+   fight over the same properties:
+     .mark    the resting state and the pointer parallax — CSS only.
+     .markIn  the entrance — GSAP only.
+   Collapsed into one, the entrance's inline opacity:1 wins over .mark's
+   resting 0.78 and stays there, so hover has nowhere left to go and the marks
+   sit at full strength forever. Same shape as section four's panel lift, which
+   silently stopped working for exactly this reason. */
+.mark{
+  display:flex; align-items:center; justify-content:center;
+  width:var(--markW); max-width:100%;
+  /* C. The pointer field, at the smallest amplitude on the page. The marks are
+     the only objects in a very empty frame, so a few pixels of drift is the
+     difference between "flat" and "lit"; any more and it becomes a toy. */
+  transform:translate3d(calc(var(--ni-px,0) * 4px), calc(var(--ni-py,0) * 4px), 0);
+  transition:opacity .7s ease;
+  /* Resting one stop below white so hover has somewhere to go. */
+  opacity:.78;
+}
+.markIn{ display:block; width:100%; will-change:transform,opacity }
+.mark img{
+  display:block; width:100%; height:auto;
+  /* The marks are baked silver by scripts/brand-logos.py, so nothing is
+     filtered here — a CSS filter over a logo is how you get a grey smudge. */
+}
+/* The name, shown until the mark's file exists. Set in the UI face and widely
+   tracked so it reads as a brand NAME and never as an attempt at the brand's
+   own logo, which would be worse than showing nothing. */
+.wordmark{
+  font-family:var(--ni-ui),system-ui,sans-serif;
+  font-size:clamp(11px,1.15vw,14px);
+  letter-spacing:.44em; text-transform:uppercase; font-weight:400;
+  color:#C6CBCE; text-align:center;
+  padding-left:.44em;   /* the tracking is applied after the last letter too */
+  white-space:nowrap;
+}
+
+/* ---------- hover ---------- */
+/* Desktop only, and deliberately almost nothing: the mark comes up to full
+   strength and the ground under it warms by a few per cent. No scale on the
+   half, no border, no shadow — at this size any of those reads as a card. */
+@media (hover:hover) and (pointer:fine){
+  .half:hover{
+    background:radial-gradient(62% 58% at 50% 50%, rgba(150,170,175,.055) 0%, rgba(4,4,5,0) 70%);
+  }
+  .half:hover .mark{ opacity:1 }
+  /* The other half steps back, so hovering one is a choice rather than a
+     highlight. This is the same idea as a gallery plate receding. */
+  .split:hover .half:not(:hover) .mark{ opacity:.5 }
+}
+.half:focus-within .mark{ opacity:1 }
+
+/* ---------- mobile ---------- */
+/* Stacked, and the divider turns with them: a vertical hairline between two
+   stacked panels would be a line down the middle of nothing. */
+@media (max-width:860px){
+  .brands{ padding:clamp(70px,10vh,110px) 20px clamp(76px,11vh,120px) }
+  .head{ padding-bottom:clamp(34px,5vh,56px) }
+  /* 8vw, not 9.4: CON CUI LAVORIAMO is 17 characters and has to fit the
+     column at its natural width now that the letters cannot be squeezed.
+     Measured, with the indent below accounted for — it clears by 5% at 375px,
+     which is the tightest of the three target widths. */
+  .title{ font-size:clamp(1.6rem,8vw,3.2rem) }
+  .lineTwo{ padding-left:clamp(12px,5vw,40px) }
+  .rule{ width:clamp(40px,13vw,70px) }
+  .split{ grid-template-columns:1fr; grid-template-rows:1fr 1px 1fr }
+  .half{ min-height:clamp(150px,22vh,210px); padding:clamp(28px,5vh,44px) 12px }
+  .divider{
+    width:auto; height:1px; justify-self:stretch;
+    background:linear-gradient(90deg,
+      rgba(169,173,178,0) 0%,
+      rgba(169,173,178,.16) 22%,
+      rgba(169,173,178,.16) 78%,
+      rgba(169,173,178,0) 100%);
+    transform:scaleX(0);
+  }
+  /* No hover on a phone, so the marks rest at full strength — the resting
+     dimness only exists to give hover somewhere to go. */
+  .mark{ opacity:.92; transform:none }
+  .wordmark{ font-size:clamp(10px,3vw,12px); letter-spacing:.36em }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .half,.mark{ transition:none }
+  .mark{ transform:none }
+  /* The entrance is skipped, so the divider has to be drawn already. */
+  .divider{ transform:none }
+}
